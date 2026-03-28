@@ -20,7 +20,7 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Runbooks (produit payant — ne pas distribuer)
+# Runbooks ([sur demande](https://www.linkedin.com/in/manuelproquin/))
 docs/install/runbook-install.md
 docs/migration/runbook-migration.md
 
