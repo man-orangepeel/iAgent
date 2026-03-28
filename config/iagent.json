@@ -25,7 +25,6 @@
     "purge_on_startup": true
   },
   "personal_assistant": {
-    "brief_time": "07:45",
     "reminder_interval_min": 15,
     "default_reminder_min": 60,
     "renotify_max_days": 7,
