@@ -62,7 +62,6 @@ Tous dans `~/.iagent/.env`.
 |---|---|---|
 | Telegram bot token | `IAGENT_BOT_TOKEN` | ✅ Gateway |
 | Telegram chat ID   | `IAGENT_CHAT_ID`   | ✅ Alertes |
-| ntfy topic | `NTFY_TOPIC` | ✅ Notifications push |
 | WebSearch | natif Claude CLI | ✅ Recherche web (via run_with_search) |
 | gog OAuth | `credentials/gog/oauth.json` | ✅ Gmail/Calendar |
 
@@ -117,7 +116,6 @@ gog calendar list --all --days 7
 | gog (Gmail/Calendar/Drive) | `gog ...` | ✅ Actif |
 | iagent (opérations internes) | `iagent ...` | ✅ Actif |
 | telegram (skills/) | via Python | ✅ Actif |
-| ntfy (skills/) | via Python | ✅ Actif |
 | whisper (skills/) | via gateway vocal | ✅ Actif |
 | documents (PDF/DOCX) | via gateway document | ✅ Actif |
 | morning brief | cron 7h45 + /brief | ✅ Actif |

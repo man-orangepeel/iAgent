@@ -1,58 +1,33 @@
-# docs/install/ — Documentation d'installation iAgent
+# Installation from scratch
 
-Ce dossier contient tout le nécessaire pour installer iAgent depuis zéro.
+Tout le nécessaire pour passer de zéro à un agent iAgent fonctionnel.
 
-## Deux parcours d'installation
+## Deux parcours
 
-| Parcours | Fichier | Public | Durée |
-|---|---|---|---|
-| **Manuel** | [guide-installation.md](guide-installation.md) | Humain (pas à pas) | 45–60 min |
-| **Automatisé** | [runbook-install.md](runbook-install.md) | Claude Code (exécution assistée) | 20–30 min |
+**Guide manuel** — [guide-installation.md](guide-installation.md)
+Toutes les étapes détaillées, avec les commandes et les vérifications.
+Durée : 45–60 min.
 
-### Parcours manuel (recommandé pour une première installation)
+**Runbook Claude Code** — [sur demande](https://www.linkedin.com/in/manuelproquin/)
+Installation semi-automatisée : Claude Code exécute le maximum,
+tu valides les 4 étapes humaines irréductibles.
+Durée : 20–30 min.
 
-Suivez [guide-installation.md](guide-installation.md) étape par étape.
-Chaque étape inclut les commandes à exécuter et les vérifications attendues.
-
-### Parcours automatisé (pour utilisateurs avancés)
-
-Donnez [runbook-install.md](runbook-install.md) à Claude Code :
-```
-claude --resume "Lis docs/install/runbook-install.md et exécute l'installation"
-```
-Claude Code exécutera les étapes `[AUTO]` et vous guidera pour les étapes `[MANUEL]`.
-
----
-
-## Prérequis rapides
-
-Avant de commencer, vérifiez que vous avez :
-
+## Avant de commencer
 ```bash
-# macOS 12+
-sw_vers
-
-# Homebrew
+python3 --version   # 3.11+
+node --version      # 18+
 brew --version
-
-# Python 3.14+
-python3 --version
-
-# Node.js 18+
-node --version
-
-# Abonnement Anthropic Pro ou Max actif
-claude --version
+claude --version    # Claude Code CLI + forfait Pro ou Max
 ```
 
-Si une commande échoue, consultez la section « Prérequis » du guide d'installation.
+Si une commande échoue, la section Prérequis du guide couvre l'installation.
 
 ---
 
-## Fichiers dans ce dossier
+### Tu préfères construire ton agent sans toucher au code ?
 
-| Fichier | Description |
-|---|---|
-| `README.md` | Ce fichier (orientation) |
-| `guide-installation.md` | Guide complet pas à pas (12 étapes) |
-| `runbook-install.md` | Runbook pour installation assistée par Claude Code (6 phases) |
+Si tu veux les bénéfices d'un assistant IA sans gérer l'infrastructure,
+le [AI Chief of Staff Bootcamp](https://aichiefofstaffbootcamp.netlify.app/)
+t'accompagne en 4 semaines pour déployer tes propres agents sur ta façon
+de travailler — sans prérequis technique.

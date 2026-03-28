@@ -1,41 +1,34 @@
-# Migration — Depuis un assistant IA existant vers iAgent
+# Migration depuis un assistant IA existant
 
-> Vous avez déjà un assistant IA (OpenClaw, custom, autre) et vous
-> voulez passer à iAgent ? Ce dossier vous guide dans la migration.
+Tu as OpenClaw ou un agent custom, et tu veux passer à iAgent.
 
 ## Prérequis
 
-**Avant de commencer la migration, complétez d'abord l'installation de base :**
+Complète d'abord l'installation de base ([docs/install/](../install/))
+et vérifie que `bash scripts/doctor.sh` passe sans erreur.
 
-1. Suivez le parcours [docs/install/](../install/) en entier
-2. Vérifiez que `bash scripts/doctor.sh` passe sans erreur
-3. Revenez ici pour les étapes spécifiques à la migration
+## Ce que couvre la migration
 
-## Ce que fait la migration
+- Audit de ton assistant existant (composants, dépendances, sécurité)
+- Migration des fichiers d'identité et des workflows métier
+- Remplacement des appels LLM (Gemini, GPT, etc.) par Claude Code CLI
+- Validation et coupure de l'ancien système
 
-La migration transforme votre installation iAgent de base en un remplacement
-complet de votre ancien assistant. Elle :
+## Deux parcours
 
-- Audite votre assistant existant pour identifier ce qui doit être conservé, remplacé ou supprimé
-- Migre vos fichiers d'identité et vos workflows métier
-- Remplace les appels LLM existants (Gemini, GPT, etc.) par Claude Code CLI
-- Valide que tout fonctionne avant de couper l'ancien système
+**Guide manuel** — [guide-migration.md](guide-migration.md)
+Étapes détaillées pour faire la migration toi-même.
+Durée : 1–2h selon la complexité de ta configuration.
 
-## Par où commencer
+**Runbook Claude Code** — [sur demande](https://www.linkedin.com/in/manuelproquin/)
+Claude Code audite ton ancien assistant, produit le tableau de migration,
+exécute les actions, tu valides à chaque checkpoint.
 
-### Option A — Vous suivez le guide vous-même
-Ouvrez [guide-migration.md](guide-migration.md) et suivez les étapes une par une.
+---
 
-### Option B — Vous laissez Claude Code faire le maximum
-*(inclus avec le RUNBOOK — [voir README.md pour l'achat](../../README.md))*
+### Tu préfères construire ton agent sans toucher au code ?
 
-1. Ouvrez Claude Code dans le terminal
-2. Donnez-lui le fichier [runbook-migration.md](runbook-migration.md) comme instruction
-3. Claude Code audite votre ancien assistant, produit les livrables, vous validez à chaque checkpoint
-
-## Fichiers dans ce dossier
-
-| Fichier | Rôle |
-|---------|------|
-| `guide-migration.md` | Guide pas-à-pas pour un humain |
-| `runbook-migration.md` | Blocs de commandes pour Claude Code |
+Si tu veux les bénéfices d'un assistant IA sans gérer l'infrastructure,
+le [AI Chief of Staff Bootcamp](https://aichiefofstaffbootcamp.netlify.app/)
+t'accompagne en 4 semaines pour déployer tes propres agents sur ta façon
+de travailler — sans prérequis technique.

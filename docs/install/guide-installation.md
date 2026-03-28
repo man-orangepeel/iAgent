@@ -120,9 +120,6 @@ Ouvrir `~/.iagent/.env` et remplir :
 IAGENT_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrSTUvwxyz
 IAGENT_CHAT_ID=987654321
 
-# ntfy (notifications push) — optionnel
-IAGENT_NTFY_TOPIC=mon-topic-secret
-
 # Google OAuth — rempli automatiquement par gog (étape 5)
 # GOG_CLIENT_ID=...
 # GOG_CLIENT_SECRET=...
@@ -304,9 +301,8 @@ Le diagnostic vérifie **17 points** :
 | 14 | gog Calendar auth | Bloquant (Google) |
 | 15 | LaunchAgents chargés | Warning |
 | 16 | Gateway Telegram active | Warning |
-| 17 | ntfy accessible | Info |
 
-**Résultat attendu : 17/17 ✓**
+**Résultat attendu : 16/16 ✓**
 
 > Mode rapide (sans appels réseau) : `bash scripts/doctor.sh --quick`
 
@@ -408,7 +404,6 @@ Pour le lancer manuellement : `/brief` dans Telegram.
 | Calendar | `gog calendar list --days N` | Agenda |
 | Drive | `gog drive list` | Fichiers Google Drive |
 | Telegram | (automatique) | Gateway de communication |
-| ntfy | (automatique) | Notifications push |
 | Whisper | (automatique) | Transcription vocale locale |
 | Documents | (automatique) | Extraction PDF / DOCX |
 | Doctor | `iagent doctor` | Diagnostic santé |
@@ -472,8 +467,7 @@ Si un token est compromis :
 
 1. **Telegram** : aller sur @BotFather → `/revoke` → copier le nouveau token dans `.env`
 2. **Google** : révoquer dans [Google Security](https://myaccount.google.com/permissions) → ré-authentifier avec `gog gmail auth` et `gog calendar auth`
-3. **ntfy** : changer le topic dans `.env` → `IAGENT_NTFY_TOPIC`
-4. **Claude** : `claude auth logout` puis `claude auth login`
+3. **Claude** : `claude auth logout` puis `claude auth login`
 5. **Redémarrer** : `launchctl kickstart -k gui/$(id -u)/com.iagent.telegram`
 
 ---

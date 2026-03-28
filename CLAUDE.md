@@ -34,7 +34,7 @@ Agent personnel autonome sur macOS.
 ## Structure
 - identity/   : personnalité et contexte (À PERSONNALISER)
 - core/       : moteur technique
-- skills/     : gog, telegram, ntfy, whisper, documents
+- skills/     : gog, telegram, whisper, documents
 - gateway/    : Telegram
 - tasks/      : heartbeat
 - projects/   : personal_assistant (morning_brief, reminder)
