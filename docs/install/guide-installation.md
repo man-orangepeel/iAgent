@@ -102,10 +102,12 @@ bash scripts/init.sh
 ```
 
 `init.sh` va :
-- Créer les dossiers manquants (`logs/`, `tmp/audio/`, `tmp/documents/`, `data/workspace/`)
-- Copier `.env.example` → `.env` si absent
-- Copier les templates `identity/*.template.md` → `identity/*.md` si absents
-- Afficher un résumé de ce qui reste à configurer
+- Créer `.env` depuis `.env.example` si absent
+- Créer les dossiers nécessaires (`logs/`, `tmp/`, `data/`, `projects/`)
+- Créer `tracking.json` pour le brief matinal
+
+Les fichiers `identity/` sont déjà dans le repo — ils guident
+la personnalisation lors de votre première conversation Telegram.
 
 ---
 
@@ -169,21 +171,26 @@ gog calendar list --days 3
 
 ---
 
-## Étape 6 — Personnaliser l'identité
+## Étape 6 — Configurer CLAUDE.md
 
-Quatre fichiers dans `identity/` définissent la personnalité de votre agent :
+`CLAUDE.md` à la racine du projet est lu par Claude Code CLI à **chaque invocation**
+(y compris en mode `--resume`). Copiez et adaptez le template :
 
-| Fichier | Rôle | Template |
-|---|---|---|
-| `IDENTITY.md` | Nom, rôle, traits de caractère | `IDENTITY.template.md` |
-| `SOUL.md` | Valeurs, principes, ton | `SOUL.template.md` |
-| `USER.md` | Infos sur vous (prénom, préférences, fuseaux horaires) | `USER.template.md` |
-| `CLAUDE.md` | Instructions techniques pour Claude (runtime + dev) | `CLAUDE-template.md` |
+```bash
+cp ~/.iagent/identity/CLAUDE-template.md ~/.iagent/CLAUDE.md
+nano ~/.iagent/CLAUDE.md
+```
 
-> `init.sh` a copié les templates. Ouvrez chaque fichier et personnalisez-le.
+Remplacez chaque `[À REMPLACER]` :
+- Nom du projet : le nom de votre agent
+- Compte macOS : votre nom d'utilisateur (`whoami`)
+- Chemin absolu : `/Users/VOTRE_USER/.iagent`
+- Python path : résultat de `which python3`
+- Langue : votre langue de travail
 
-**Important** : `CLAUDE.md` à la racine du projet est le fichier lu par Claude Code.
-Adaptez les commandes, les chemins et les règles à votre usage.
+> **Les fichiers `identity/IDENTITY.md`, `SOUL.md` et `USER.md`** seront
+> personnalisés automatiquement lors de votre première conversation Telegram.
+> L'agent vous guide — pas besoin de les éditer manuellement.
 
 ---
 
@@ -336,6 +343,12 @@ bash scripts/security-audit.sh --category 3 # une seule catégorie
 ---
 
 ## Étape 12 — Premier contact
+
+> **Première fois :** votre agent va se présenter et vous poser des questions
+> pour configurer son identité (nom, personnalité, vos préférences).
+> C'est le processus d'initialisation guidé par `identity/BOOTSTRAP.md`.
+> Il mettra à jour les fichiers `identity/` lui-même et supprimera
+> `BOOTSTRAP.md` une fois terminé.
 
 Ouvrir Telegram et envoyer un message à votre bot.
 

@@ -3,12 +3,6 @@
 *.pem
 *.key
 
-# Fichiers identity live (générés par init.sh, personnalisés par l'utilisateur)
-identity/IDENTITY.md
-identity/SOUL.md
-identity/USER.md
-identity/MEMORY.md
-
 # Données personnelles
 data/sessions.json
 data/integrity.json

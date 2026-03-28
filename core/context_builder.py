@@ -24,7 +24,7 @@ _PROFILES: dict[str, list[str]] = {
     "heartbeat_memory":    ["MEMORY.md", "AGENTS.md"],
     "heartbeat_queue":     ["QUEUE.md", "AGENTS.md", "COMMUNICATION.md"],
     "heartbeat_proactive": ["USER.md", "MEMORY.md", "HEARTBEAT.md"],
-    "telegram_session":    ["IDENTITY.md", "SOUL.md", "USER.md", "MEMORY.md",
+    "telegram_session":    ["BOOTSTRAP.md", "IDENTITY.md", "SOUL.md", "USER.md", "MEMORY.md",
                             "AGENTS.md", "TOOLS.md", "COMMUNICATION.md", "QUEUE.md"],
 }
 
