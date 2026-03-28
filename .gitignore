@@ -20,6 +20,10 @@ __pycache__/
 # macOS
 .DS_Store
 
+# Runbooks (produit payant — ne pas distribuer)
+docs/install/runbook-install.md
+docs/migration/runbook-migration.md
+
 # Editeurs
 .vscode/
 .claude/

@@ -57,6 +57,9 @@ Claude Code lit le runbook, t'explique ce qu'il va faire, et attend ton go.
 
 ---
 
-> **Bloqué quelque part ?**
-> Envoie un message sur [LinkedIn](https://www.linkedin.com/in/manuelproquin/)
-> en précisant l'étape où tu es bloqué.
+### Tu préfères construire ton assistant IA sans toucher au code ?
+Le [AI Chief of Staff Bootcamp](https://aichiefofstaffbootcamp.netlify.app/) (Neon&Slate)
+t'accompagne en 4 semaines pour déployer tes propres agents IA sur ta façon de travailler —
+emails, réunions, notes, to-do, production de contenu — sans prérequis technique.
+
+---
