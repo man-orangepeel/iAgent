@@ -1,0 +1,45 @@
+#!/bin/bash
+# iagent — Dispatcher CLI iAgent
+# Usage : iagent <commande> [options]
+# Toutes les opérations internes passent par ce point d'entrée unique.
+
+set -uo pipefail
+IAGENT_DIR="$HOME/.iagent"
+cd "$IAGENT_DIR"
+
+PYTHON="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
+
+case "${1:-}" in
+    doctor)
+        bash scripts/doctor.sh "${@:2}"
+        ;;
+    security)
+        bash scripts/security-audit.sh "${@:2}"
+        ;;
+    heartbeat)
+        $PYTHON tasks/heartbeat.py "${@:2}"
+        ;;
+    logs)
+        LOG="${2:-telegram}"
+        if [ -f "logs/${LOG}.log" ]; then
+            tail -20 "logs/${LOG}.log"
+        else
+            echo "Logs disponibles : runner, heartbeat, heartbeat_error, telegram, telegram_error"
+            exit 1
+        fi
+        ;;
+    --help|-h|"")
+        echo "iAgent CLI dispatcher"
+        echo ""
+        echo "Commandes :"
+        echo "  doctor [--quick]       Diagnostic santé (17 checks)"
+        echo "  security [--fix]       Audit sécurité (35 checks)"
+        echo "  heartbeat [--dry-run]  Lancer le heartbeat manuellement"
+        echo "  logs [nom]             Dernières lignes d'un log"
+        ;;
+    *)
+        echo "Commande inconnue : $1"
+        echo "Lancer 'iagent --help' pour la liste des commandes."
+        exit 1
+        ;;
+esac

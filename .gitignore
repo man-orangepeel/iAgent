@@ -1,0 +1,26 @@
+# Credentials — ne jamais committer
+.env
+*.pem
+*.key
+
+# Données personnelles
+data/sessions.json
+data/integrity.json
+data/memory/*.md
+projects/*/state/*.json
+logs/*.log
+tmp/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Editeurs
+.vscode/
+.claude/
+*.swp
