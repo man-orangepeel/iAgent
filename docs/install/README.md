@@ -2,6 +2,10 @@
 
 Tout le nécessaire pour passer de zéro à un agent iAgent fonctionnel.
 
+> **Première fois ?** Commence par [QUICKSTART.md](../../QUICKSTART.md)
+> à la racine du repo — il couvre l'installation de VS Code,
+> Claude Code et le clonage du repo avant de revenir ici.
+
 ## Deux parcours
 
 **Guide manuel** — [guide-installation.md](guide-installation.md)

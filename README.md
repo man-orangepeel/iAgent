@@ -2,6 +2,8 @@
 
 Inspiré d'OpenClaw — sans les dépendances, sans les frais API, sans le code fermé.
 
+**→ [Démarrage rapide — 4 étapes pour commencer](QUICKSTART.md)**
+
 > Construit de zéro en Python pur, sans framework, sans dépendance externe —
 > architecture, sécurité, documentation et déploiement réalisés en autonomie.
 
