@@ -26,7 +26,7 @@ Agent personnel autonome sur macOS.
 
 ## Stack
 - Python 3.14+
-- Claude Code CLI (forfait Max)
+- Claude Code CLI (forfait Pro ou Max)
 - python-telegram-bot
 - gog (Google OAuth)
 - whisper local

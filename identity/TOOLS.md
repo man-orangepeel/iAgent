@@ -18,7 +18,7 @@ Quand l'utilisateur demande ses emails, son agenda, un diagnostic → **exécute
 Sur macOS avec Python.org : `/Library/Frameworks/Python.framework/Versions/3.X/bin/python3`
 
 **Moteur LLM :** Claude Code CLI (`claude -p`) via `core/claude_runner.py`.
-Pas de clé API — auth OAuth forfait Max.
+Pas de clé API — auth OAuth forfait Pro ou Max.
 
 ---
 

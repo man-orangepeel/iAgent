@@ -18,7 +18,7 @@ fichiers, audio) à la demande, sans interface graphique.
 
 | Composant | Technologie |
 |---|---|
-| LLM | Claude Code CLI (forfait Max — 0 API payante) |
+| LLM | Claude Code CLI (forfait Pro ou Max — 0 API payante) |
 | Interface | Telegram (polling) |
 | Email/Calendar | gog CLI (Google OAuth) |
 | Transcription | Whisper local |
@@ -39,7 +39,7 @@ cp .env.example .env
 
 - macOS (testé sur macOS 14+)
 - Python 3.11+
-- Claude Code CLI avec forfait Max
+- Claude Code CLI avec forfait Pro (20€/mois) ou Max
   `curl -fsSL https://claude.ai/install.sh | bash`
 - Compte Telegram + bot créé via @BotFather
 - gog CLI (Google OAuth — Gmail, Calendar, Drive)

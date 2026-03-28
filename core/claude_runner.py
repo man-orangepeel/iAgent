@@ -2,7 +2,7 @@
 """
 claude_runner.py — Moteur principal iAgent : appel Claude Code CLI via subprocess.
 
-Aucune clé API requise — utilise l'auth OAuth du compte (forfait Max).
+Aucune clé API requise — utilise l'auth OAuth du compte (forfait Pro ou Max).
 
 Fonctions disponibles :
     run()                      — appel one-shot sans outils (--tools "")
