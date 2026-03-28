@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>/Users/USERNAME</string>
+		<key>PATH</key>
+		<string>/Users/USERNAME/.iagent/scripts:/Users/USERNAME/.npm-global/bin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/usr/local/bin:/usr/bin:/bin</string>
+	</dict>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>com.iagent.telegram</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Library/Frameworks/Python.framework/Versions/3.14/bin/python3</string>
+		<string>/Users/USERNAME/.iagent/gateway/telegram_gateway.py</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/Users/USERNAME/.iagent/logs/telegram_error.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/USERNAME/.iagent/logs/telegram.log</string>
+	<key>WorkingDirectory</key>
+	<string>/Users/USERNAME/.iagent</string>
+</dict>
+</plist>
