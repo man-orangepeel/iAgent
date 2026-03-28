@@ -14,7 +14,8 @@ Quand l'utilisateur demande ses emails, son agenda, un diagnostic → **exécute
 
 ---
 
-**Python actif :** [À configurer — chemin vers python3]
+**Python actif :** python3 (adapter selon ton système)
+Sur macOS avec Python.org : `/Library/Frameworks/Python.framework/Versions/3.X/bin/python3`
 
 **Moteur LLM :** Claude Code CLI (`claude -p`) via `core/claude_runner.py`.
 Pas de clé API — auth OAuth forfait Max.
@@ -48,7 +49,7 @@ send_photo("https://...", caption="Légende")
 send_poll("?", ["Oui", "Non", "Peut-être"])
 
 # DM alertes opérateur
-send_message("Alerte : ...", chat_id=TELEGRAM_CHAT_ID_ALERTES)
+send_message("Alerte : ...", chat_id=IAGENT_CHAT_ID)
 ```
 
 ---
@@ -59,8 +60,8 @@ Tous dans `~/.iagent/.env`.
 
 | Credential | Variable `.env` | Utilisé ? |
 |---|---|---|
-| Telegram bot | `TELEGRAM_BOT_TOKEN_KINTO_UN` | ✅ Alertes |
-| Telegram chat Alertes | `TELEGRAM_CHAT_ID_ALERTES` | ✅ Alertes |
+| Telegram bot token | `IAGENT_BOT_TOKEN` | ✅ Gateway |
+| Telegram chat ID   | `IAGENT_CHAT_ID`   | ✅ Alertes |
 | ntfy topic | `NTFY_TOPIC` | ✅ Notifications push |
 | WebSearch | natif Claude CLI | ✅ Recherche web (via run_with_search) |
 | gog OAuth | `credentials/gog/oauth.json` | ✅ Gmail/Calendar |
@@ -138,7 +139,7 @@ Comportement :
 
 ## Documents — Extraction PDF, DOCX
 
-Outils : pdftotext (poppler via brew), textutil (macOS natif)
+Outils Python : pdfplumber (PDF), python-docx (DOCX)
 Formats : .pdf, .docx, .doc
 Limite : 40 000 caractères envoyés à Claude (tronqué si plus)
 Stockage : caption "stocke dans <projet>" → data/workspace/<projet>/

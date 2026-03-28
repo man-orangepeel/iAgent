@@ -25,10 +25,10 @@
     "purge_on_startup": true
   },
   "personal_assistant": {
-    "brief_time": "07:00",
+    "brief_time": "07:45",
     "reminder_interval_min": 15,
     "default_reminder_min": 60,
     "renotify_max_days": 7,
-    "chat_id_env_var": "TELEGRAM_CHAT_ID_ALERTES"
+    "chat_id_env_var": "IAGENT_CHAT_ID"
   }
 }

@@ -9,7 +9,7 @@ fichiers, audio) à la demande, sans interface graphique.
 - **Conversation** : répond à tes questions, cherche sur le web
 - **Email** : lit et résume tes mails Gmail (non lus, par critères)
 - **Calendrier** : consulte ton agenda Google
-- **Fichiers** : lit et analyse PDF, DOCX, XLSX
+- **Fichiers** : lit et analyse PDF, DOCX
 - **Audio** : transcrit tes messages vocaux Telegram
 - **Brief matinal** : résumé agenda + mails à 7h45
 - **Rappels** : notifications avant événements
@@ -22,13 +22,14 @@ fichiers, audio) à la demande, sans interface graphique.
 | Interface | Telegram (polling) |
 | Email/Calendar | gog CLI (Google OAuth) |
 | Transcription | Whisper local |
-| Documents | pdftotext, textutil |
+| Documents | pdfplumber, python-docx |
 | Notifications | ntfy.sh |
 
 ## Installation rapide
 ```bash
-git clone https://github.com/man-orangepeel/iagent
-cd iagent
+git clone https://github.com/man-orangepeel/iagent ~/.iagent
+cd ~/.iagent
+pip install -r requirements.txt
 cp .env.example .env
 # Remplir .env avec tes credentials
 # Voir RUNBOOK.md pour le guide complet
@@ -39,9 +40,11 @@ cp .env.example .env
 - macOS (testé sur macOS 14+)
 - Python 3.11+
 - Claude Code CLI avec forfait Max
+  `curl -fsSL https://claude.ai/install.sh | bash`
 - Compte Telegram + bot créé via @BotFather
-- Compte Google + gog CLI configuré
-- ffmpeg (pour Whisper)
+- gog CLI (Google OAuth — Gmail, Calendar, Drive)
+  Voir RUNBOOK.md section 3 pour l'installation
+- ffmpeg (pour Whisper) : `brew install ffmpeg`
 
 ## Personnalisation
 

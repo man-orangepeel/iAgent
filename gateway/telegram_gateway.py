@@ -153,14 +153,16 @@ def _md_to_html(text: str) -> str:
 
 # --- Whitelist ---
 
+_WHITELIST: set[str] = set()
+
+
 def _load_whitelist() -> set[str]:
-    load_env()
-    chat_id = require_env("TELEGRAM_CHAT_ID_ALERTES")
+    chat_id = require_env("IAGENT_CHAT_ID")
     return {chat_id.strip()}
 
 
 def _is_authorized(chat_id: str) -> bool:
-    return chat_id in _load_whitelist()
+    return chat_id in _WHITELIST
 
 
 # --- Tracking brief ---
@@ -238,8 +240,9 @@ async def _handle_doctor(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         cwd=str(_IAGENT_DIR),
     )
     output = (result.stdout + result.stderr).strip()
-    # Envoyer tel quel (texte brut, pas de HTML)
-    await message.reply_text(output[:4000])
+    # Envoyer en chunks (texte brut, pas de HTML)
+    for i in range(0, len(output), 4000):
+        await message.reply_text(output[i:i+4000])
 
 
 # --- Handler /reset ---
@@ -456,9 +459,18 @@ async def _handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     # Vérifier format supporté
     if suffix not in DOC_EXTENSIONS:
+        exts = ", ".join(e.lstrip(".").upper() for e in sorted(DOC_EXTENSIONS))
         await message.reply_text(
             f"⚠️ Format non supporté : {suffix}\n"
-            f"Formats acceptés : PDF, DOCX"
+            f"Formats acceptés : {exts}"
+        )
+        return
+
+    # Vérifier taille (limite Telegram bot API : 20 Mo)
+    _MAX_FILE_SIZE = 20 * 1024 * 1024
+    if doc.file_size and doc.file_size > _MAX_FILE_SIZE:
+        await message.reply_text(
+            f"⚠️ Fichier trop volumineux ({doc.file_size // (1024*1024)} Mo). Limite : 20 Mo."
         )
         return
 
@@ -576,9 +588,11 @@ async def _handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 # --- Démarrage ---
 
 def start_gateway() -> None:
+    global _WHITELIST
     load_env()
     purge_tmp(max_age_hours=24)
-    token = require_env("TELEGRAM_BOT_TOKEN_KINTO_UN")
+    _WHITELIST = _load_whitelist()
+    token = require_env("IAGENT_BOT_TOKEN")
     app = Application.builder().token(token).build()
     app.add_handler(CommandHandler("audit", _handle_audit))
     app.add_handler(CommandHandler("brief", _handle_brief))
@@ -598,13 +612,13 @@ def start_gateway() -> None:
 
     app.post_init = _post_init
     print("🚀 Gateway Telegram iAgent démarré (WebSearch + Whisper + Documents + Brief)")
-    print(f"   Whitelist : {_load_whitelist()}")
+    print(f"   Whitelist : {len(_WHITELIST)} chat(s) autorisé(s)")
     app.run_polling(drop_pending_updates=True)
 
 
 def dry_run() -> None:
     load_env()
-    token = require_env("TELEGRAM_BOT_TOKEN_KINTO_UN")
+    token = require_env("IAGENT_BOT_TOKEN")
     whitelist = _load_whitelist()
     bootstrap = build_context("telegram_session")
     print("=== Gateway Telegram iAgent — Dry Run ===")

@@ -131,6 +131,6 @@ def get_alerts_client() -> TelegramClient:
     from core.env_loader import load_env, require_env
     load_env()
     return TelegramClient(
-        bot_token=require_env("TELEGRAM_BOT_TOKEN_KINTO_UN"),
-        chat_id=require_env("TELEGRAM_CHAT_ID_ALERTES"),
+        bot_token=require_env("IAGENT_BOT_TOKEN"),
+        chat_id=require_env("IAGENT_CHAT_ID"),
     )

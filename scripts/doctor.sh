@@ -78,7 +78,7 @@ fi
 # 6. Credentials
 if [ -f "$ENV_FILE" ]; then
     COK=0
-    for v in TELEGRAM_BOT_TOKEN_KINTO_UN TELEGRAM_CHAT_ID_ALERTES; do
+    for v in IAGENT_BOT_TOKEN IAGENT_CHAT_ID; do
         grep -q "^$v=" "$ENV_FILE" 2>/dev/null || COK=1
     done
     [ "$COK" -eq 0 ] && check "Credentials .env" 0 "Tokens présents ($ENV_FILE)" \
@@ -203,7 +203,7 @@ import urllib.request, json, ssl
 from pathlib import Path
 token = None
 for line in Path('$ENV_FILE').read_text().splitlines():
-    if line.startswith('TELEGRAM_BOT_TOKEN_KINTO_UN='):
+    if line.startswith('IAGENT_BOT_TOKEN='):
         token = line.split('=',1)[1].strip()
 if not token: print('TOKEN_ABSENT'); exit()
 try:

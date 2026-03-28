@@ -137,8 +137,8 @@ def _send_alert(message: str) -> bool:
     try:
         import requests
         load_env()
-        token = require_env("TELEGRAM_BOT_TOKEN_KINTO_UN")
-        chat_id = require_env("TELEGRAM_CHAT_ID_ALERTES")
+        token = require_env("IAGENT_BOT_TOKEN")
+        chat_id = require_env("IAGENT_CHAT_ID")
         resp = requests.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
             json={"chat_id": chat_id, "text": message[:4000], "parse_mode": "Markdown"},
