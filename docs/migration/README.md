@@ -1,7 +1,7 @@
-# Migration — Depuis OpenClaw vers iAgent
+# Migration — Depuis un assistant IA existant vers iAgent
 
-> Vous avez déjà OpenClaw et vous voulez passer à iAgent ?
-> Ce dossier vous guide dans la migration.
+> Vous avez déjà un assistant IA (OpenClaw, custom, autre) et vous
+> voulez passer à iAgent ? Ce dossier vous guide dans la migration.
 
 ## Prérequis
 
@@ -13,10 +13,12 @@
 
 ## Ce que fait la migration
 
-La migration transforme votre installation iAgent de base en un remplacement complet de votre OpenClaw existant. Elle :
-- Audite votre OpenClaw pour identifier ce qui doit être conservé, remplacé ou supprimé
-- Migre vos fichiers d'identité (bootstrap) et vos workflows métier
-- Personnalise le CLAUDE.md avec les spécificités de votre configuration
+La migration transforme votre installation iAgent de base en un remplacement
+complet de votre ancien assistant. Elle :
+
+- Audite votre assistant existant pour identifier ce qui doit être conservé, remplacé ou supprimé
+- Migre vos fichiers d'identité et vos workflows métier
+- Remplace les appels LLM existants (Gemini, GPT, etc.) par Claude Code CLI
 - Valide que tout fonctionne avant de couper l'ancien système
 
 ## Par où commencer
@@ -27,7 +29,7 @@ Ouvrez [guide-migration.md](guide-migration.md) et suivez les étapes une par un
 ### Option B — Vous laissez Claude Code faire le maximum
 1. Ouvrez Claude Code dans le terminal
 2. Donnez-lui le fichier [runbook-migration.md](runbook-migration.md) comme instruction
-3. Claude Code audite votre OpenClaw, produit les livrables, vous validez à chaque checkpoint
+3. Claude Code audite votre ancien assistant, produit les livrables, vous validez à chaque checkpoint
 
 ## Fichiers dans ce dossier
 

@@ -1,47 +1,43 @@
-# Guide de migration — OpenClaw vers iAgent
+# Guide de migration — Depuis un assistant IA existant vers iAgent
 
 > Ce guide suppose que vous avez déjà complété l'installation de base
 > (voir `docs/install/guide-installation.md`).
 >
-> Durée estimée : 1-2 heures (selon la complexité de votre OpenClaw).
+> Durée estimée : 1-2 heures (selon la complexité de votre configuration existante).
 
 ---
 
 ## Vue d'ensemble
 
-La migration se fait en 4 étapes :
+La migration se fait en 6 étapes :
 
-1. **Auditer** votre OpenClaw existant
+1. **Auditer** votre assistant existant
 2. **Inventorier** les composants à migrer
-3. **Migrer** les fichiers et personnaliser la configuration
-4. **Valider** et couper l'ancien système
+3. **Migrer** les fichiers d'identité et personnaliser la configuration
+4. **Migrer** les composants LLM
+5. **Valider** que tout fonctionne
+6. **Couper** l'ancien système
 
 ---
 
-## Étape 1 — Auditer votre OpenClaw
+## Étape 1 — Auditer votre assistant existant
 
-Vous devez d'abord comprendre ce que contient votre OpenClaw. Claude Code peut faire cet audit pour vous.
+Vous devez d'abord comprendre ce que contient votre assistant actuel.
+Claude Code peut faire cet audit pour vous.
 
-### Ce qu'il faut lire
+### Ce qu'il faut identifier
 
-Demandez à Claude Code (ou lisez vous-même) :
+Demandez à Claude Code (ou faites-le vous-même) de lire et documenter :
 
-```
-Lis les fichiers suivants de mon OpenClaw et produis un rapport d'architecture :
-- ~/.openclaw/openclaw.json (sans afficher les tokens)
-- ~/.openclaw/cron/jobs.json
-- ~/.openclaw/workspace/IDENTITY.md
-- ~/.openclaw/workspace/SOUL.md
-- ~/.openclaw/workspace/MEMORY.md
-- ~/.openclaw/workspace/AGENTS.md
-- ~/.openclaw/workspace/TOOLS.md
-- ~/.openclaw/workspace/COMMUNICATION.md
-- ~/.openclaw/workspace/QUEUE.md
-- ~/.openclaw/workspace/HEARTBEAT.md
-- Tous les fichiers Python dans ~/.openclaw/workspace/tasks/
-- Tous les fichiers Python dans ~/.openclaw/workspace/agents/
-- ~/.openclaw/hooks/ (tous les fichiers)
-```
+- **Fichiers d'identité** : personnalité, contexte utilisateur, mémoire
+  (souvent nommés IDENTITY.md, SOUL.md, USER.md, MEMORY.md ou équivalent)
+- **Configuration** : fichier de config principal (JSON, YAML, etc.)
+- **Agents/tâches** : scripts Python ou autres qui exécutent des actions
+  (heartbeat, rédaction, veille, etc.)
+- **Workflows automatisés** : CRON jobs, LaunchAgents, services planifiés
+- **Dépendances externes** : APIs utilisées (Gemini, GPT, Tavily, Brave, etc.),
+  credentials, bibliothèques
+- **Données d'état** : fichiers de session, mémoire persistante, déduplication
 
 ### Livrable attendu
 
@@ -61,10 +57,10 @@ Sauvegardez ce document — c'est votre référence pour la suite.
 
 | Action | Signification | Exemple |
 |--------|---------------|---------|
-| **CONSERVER** | Code Python fonctionnel, aucune migration nécessaire | Scripts utilitaires sans LLM |
-| **REMPLACER_LLM** | Garder la logique, remplacer l'appel Gemini/GPT par Claude CLI | Agent rédacteur, heartbeat LLM |
-| **RÉÉCRIRE** | Dépend du gateway Node.js OpenClaw, à recoder en Python | Gateway Telegram, CRON jobs |
-| **SUPPRIMER** | Fonctionnalité inutilisée ou redondante | Validations obsolètes |
+| **CONSERVER** | Code Python fonctionnel, aucune migration nécessaire | Scripts utilitaires sans appel LLM |
+| **REMPLACER_LLM** | Garder la logique, remplacer l'appel LLM par Claude CLI | Agent rédacteur, heartbeat LLM |
+| **RÉÉCRIRE** | Dépend d'une infrastructure absente dans iAgent | Gateway Node.js, webhooks custom |
+| **SUPPRIMER** | Fonctionnalité inutilisée ou redondante | Validations obsolètes, code mort |
 
 ### Format recommandé
 
@@ -72,8 +68,11 @@ Créez un tableau à 5 colonnes :
 
 ```markdown
 | Composant | Rôle actuel | Moteur actuel | Action iAgent | Priorité |
-|-----------|-------------|---------------|------------------|----------|
-| ... | ... | ... | ... | P1/P2/P3 |
+|-----------|-------------|---------------|---------------|----------|
+| heartbeat | Surveillance | Gemini API    | REMPLACER_LLM | P1       |
+| gateway   | Telegram     | Node.js       | RÉÉCRIRE      | P1       |
+| rédacteur | Newsletter   | GPT-4         | REMPLACER_LLM | P2       |
+| archive   | Nettoyage    | Python pur    | CONSERVER      | P3       |
 ```
 
 Identifiez également :
@@ -84,53 +83,60 @@ Identifiez également :
 
 ---
 
-## Étape 3 — Migrer les fichiers
+## Étape 3 — Migrer les fichiers d'identité
 
-### 3a. Fichiers bootstrap (identité)
+### 3a. Fichiers d'identité (personnalité)
 
-Copiez vos fichiers bootstrap existants dans `~/.iagent/identity/` :
+Copiez vos fichiers d'identité existants dans `~/.iagent/identity/` :
 
 ```bash
-# Exemple — adaptez selon votre audit
-cp ~/.openclaw/workspace/IDENTITY.md ~/.iagent/identity/
-cp ~/.openclaw/workspace/SOUL.md ~/.iagent/identity/
-cp ~/.openclaw/workspace/USER.md ~/.iagent/identity/
+# Adaptez les chemins selon votre ancien assistant
+cp ~/ancien-assistant/IDENTITY.md ~/.iagent/identity/IDENTITY.md
+cp ~/ancien-assistant/SOUL.md ~/.iagent/identity/SOUL.md
+cp ~/ancien-assistant/USER.md ~/.iagent/identity/USER.md
 # etc.
 ```
 
 **Important :** éditez ensuite chaque fichier pour :
-- Remplacer les mentions de Gemini/GPT par Claude
-- Supprimer les références au gateway Node.js
-- Mettre à jour les chemins de fichiers
+- Remplacer les mentions de Gemini, GPT ou autre LLM par Claude Code CLI
+- Supprimer les références à l'ancien gateway ou framework
+- Mettre à jour les chemins de fichiers vers `~/.iagent/`
+- Vérifier que le format est compatible avec iAgent
+  (voir les templates dans `identity/*.template.md` pour référence)
 
-### 3b. Projets métier (ex: OrangePeel Flow)
+### 3b. Projets métier
 
-Les projets métier vivent dans leur propre dossier, séparés de iAgent :
+Si vous avez des projets métier (newsletter, veille, pipeline de contenu, etc.),
+deux options :
 
+**Option 1 — Projet intégré à iAgent :**
 ```bash
-# Exemple : extraction d'un projet dans son propre répertoire
-mkdir -p ~/.orangepeel_flow/{agents,prompts,state,logs}
-cp ~/.openclaw/workspace/projects/orangepeel_flow/agents/*.py ~/.orangepeel_flow/agents/
-cp ~/.openclaw/workspace/projects/orangepeel_flow/prompts/*.txt ~/.orangepeel_flow/prompts/
-cp ~/.openclaw/workspace/projects/orangepeel_flow/state/*.json ~/.orangepeel_flow/state/
+mkdir -p ~/.iagent/projects/mon-projet/{agents,prompts,state,logs}
+cp ~/ancien-assistant/projets/mon-projet/agents/*.py ~/.iagent/projects/mon-projet/agents/
 ```
 
+**Option 2 — Projet séparé (recommandé si autonome) :**
+```bash
+mkdir -p ~/mon-projet/{agents,prompts,state,logs}
+cp ~/ancien-assistant/projets/mon-projet/agents/*.py ~/mon-projet/agents/
+```
 Les agents du projet importent `core.*` depuis iAgent via `sys.path`.
 
 ### 3c. Données d'état
 
-Si vous avez des fichiers d'état (déduplication, mémoire) :
-
+Si vous avez des fichiers d'état (déduplication, mémoire, sessions) :
 ```bash
-cp ~/.openclaw/workspace/projects/*/state/state.json ~/.orangepeel_flow/state/
+# Adaptez selon votre structure
+cp ~/ancien-assistant/data/state.json ~/.iagent/data/
 ```
 
 ### 3d. Personnaliser CLAUDE.md
 
-Éditez `~/.iagent/CLAUDE.md` (déjà créé à l'installation) pour ajouter :
-- Les décisions architecturales de votre migration (section "Décisions architecturales")
+Éditez `~/.iagent/CLAUDE.md` (créé à l'installation via `identity/CLAUDE-template.md`)
+pour ajouter :
+- Les décisions architecturales de votre migration
 - Les problèmes connus spécifiques à votre configuration
-- Les phases spécifiques de votre migration (à la place des phases génériques)
+- Les phases de votre migration (à la place des phases génériques)
 
 ### 3e. Personnaliser iagent.json
 
@@ -138,7 +144,6 @@ cp ~/.openclaw/workspace/projects/*/state/state.json ~/.orangepeel_flow/state/
 - `python_path` : résultat de `which python3` sur votre machine
 - `session.ttl_hours` : durée avant réinitialisation de session Telegram
 - `session.max_size_kb` : taille max du fichier de session
-- `heartbeat.interval_minutes` : fréquence du heartbeat
 
 ---
 
@@ -146,7 +151,7 @@ cp ~/.openclaw/workspace/projects/*/state/state.json ~/.orangepeel_flow/state/
 
 Pour chaque composant classé **REMPLACER_LLM** dans votre tableau :
 
-1. Identifiez l'appel LLM actuel (Gemini, GPT, etc.)
+1. Identifiez l'appel LLM actuel (Gemini, GPT, Groq, etc.)
 2. Remplacez-le par un appel à `core/claude_runner.py` :
 
 ```python
@@ -157,9 +162,18 @@ response = run(
     context_files=["identity/IDENTITY.md", "identity/SOUL.md"],
     timeout=60
 )
+
+if response.success:
+    print(response.text)
+else:
+    print(f"Erreur : {response.error}")
 ```
 
 3. Testez chaque composant migré individuellement
+4. Vérifiez que le résultat est comparable à l'ancien système
+
+> **Conseil :** migrez les composants P1 d'abord, validez, puis passez aux P2.
+> Ne migrez pas tout en une seule fois.
 
 ---
 
@@ -185,20 +199,34 @@ Envoyez un message à votre bot et vérifiez :
 - Bootstrap chargé (identité correcte)
 - Session persistante (2e message sans re-bootstrap)
 
+### Test des composants migrés
+
+Pour chaque composant REMPLACER_LLM migré, exécutez-le manuellement
+et comparez le résultat avec l'ancien système.
+
 ---
 
 ## Étape 6 — Couper l'ancien système
 
 Une fois la validation complète :
 
-1. **Arrêter les services OpenClaw** :
+1. **Arrêter les services de l'ancien assistant** :
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.openclaw.*.plist
+# Adaptez selon votre ancien système
+launchctl unload ~/Library/LaunchAgents/com.ancien-assistant.*.plist
+# ou : arrêter le service Node.js, CRON, etc.
 ```
 
-2. **Ne pas supprimer immédiatement** — gardez `~/.openclaw/` pendant 1-2 semaines en cas de besoin de référence
+2. **Ne pas supprimer immédiatement** — gardez l'ancien dossier pendant
+   2 semaines minimum en cas de besoin de référence
 
-3. **Révoquer les clés API obsolètes** (Gemini, Groq, etc.) si vous ne les utilisez plus
+3. **Révoquer les clés API obsolètes** (Gemini, Groq, OpenAI, Tavily, etc.)
+   si vous ne les utilisez plus ailleurs
+
+4. **Archiver** (optionnel) :
+```bash
+mv ~/ancien-assistant ~/ancien-assistant_archived_$(date +%Y%m%d)
+```
 
 ---
 
@@ -206,7 +234,10 @@ launchctl unload ~/Library/LaunchAgents/com.openclaw.*.plist
 
 Si un composant migré ne fonctionne pas :
 
-1. Vérifiez les logs : `cat ~/.iagent/logs/runner.log`
-2. Testez le composant en isolation : `python3 -c "from agents.xxx import run; print(run({...}))"`
-3. Comparez avec le comportement original dans OpenClaw
+1. Vérifiez les logs : `tail -50 ~/.iagent/logs/runner.log`
+2. Testez le composant en isolation :
+   ```python
+   python3 -c "from core.claude_runner import run; r = run('test', timeout=30); print(r)"
+   ```
+3. Comparez avec le comportement original dans votre ancien assistant
 4. Consultez les erreurs fréquentes dans `docs/install/guide-installation.md`
