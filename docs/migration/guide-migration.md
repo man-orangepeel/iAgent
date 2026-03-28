@@ -142,8 +142,12 @@ pour ajouter :
 
 Éditez `~/.iagent/config/iagent.json` pour ajuster :
 - `python_path` : résultat de `which python3` sur votre machine
-- `session.ttl_hours` : durée avant réinitialisation de session Telegram
-- `session.max_size_kb` : taille max du fichier de session
+- `session.ttl_hours` : durée (en heures) avant réinitialisation automatique
+  d'une session Telegram inactive (défaut : 4h)
+- `session.max_size_kb` : taille max d'un fichier de session avant
+  réinitialisation forcée (défaut : 200 KB). La réinitialisation ne se
+  déclenche que si **les deux conditions** sont remplies (TTL dépassé ET
+  taille dépassée). **Ne pas modifier** sans comprendre ce mécanisme.
 
 ---
 

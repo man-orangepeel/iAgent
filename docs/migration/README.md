@@ -27,6 +27,8 @@ complet de votre ancien assistant. Elle :
 Ouvrez [guide-migration.md](guide-migration.md) et suivez les étapes une par une.
 
 ### Option B — Vous laissez Claude Code faire le maximum
+*(inclus avec le RUNBOOK — [voir README.md pour l'achat](../../README.md))*
+
 1. Ouvrez Claude Code dans le terminal
 2. Donnez-lui le fichier [runbook-migration.md](runbook-migration.md) comme instruction
 3. Claude Code audite votre ancien assistant, produit les livrables, vous validez à chaque checkpoint
