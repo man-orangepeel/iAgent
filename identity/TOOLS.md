@@ -139,7 +139,7 @@ Comportement :
 
 ## Documents — Extraction PDF, DOCX
 
-Outils Python : pdfplumber (PDF), python-docx (DOCX)
+Outils CLI : pdftotext (poppler via brew), textutil (macOS natif)
 Formats : .pdf, .docx, .doc
 Limite : 40 000 caractères envoyés à Claude (tronqué si plus)
 Stockage : caption "stocke dans <projet>" → data/workspace/<projet>/

@@ -1,5 +1,2 @@
-openai-whisper
-pdfplumber
-python-docx
 python-telegram-bot>=20.0
 requests

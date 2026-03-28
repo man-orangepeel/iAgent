@@ -22,7 +22,7 @@ fichiers, audio) à la demande, sans interface graphique.
 | Interface | Telegram (polling) |
 | Email/Calendar | gog CLI (Google OAuth) |
 | Transcription | Whisper local |
-| Documents | pdfplumber, python-docx |
+| Documents | pdftotext (poppler), textutil (macOS) |
 | Notifications | ntfy.sh |
 
 ## Installation rapide
@@ -45,6 +45,7 @@ cp .env.example .env
 - gog CLI (Google OAuth — Gmail, Calendar, Drive)
   Voir RUNBOOK.md section 3 pour l'installation
 - ffmpeg (pour Whisper) : `brew install ffmpeg`
+- poppler (pour PDF) : `brew install poppler`
 
 ## Personnalisation
 
