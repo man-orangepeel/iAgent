@@ -30,9 +30,9 @@ fichiers, audio) à la demande, sans interface graphique.
 git clone https://github.com/man-orangepeel/iagent ~/.iagent
 cd ~/.iagent
 pip install -r requirements.txt
-cp .env.example .env
+bash scripts/init.sh
 # Remplir .env avec tes credentials
-# Voir RUNBOOK.md pour le guide complet
+# Voir docs/install/ pour le guide complet
 ```
 
 ## Prérequis
@@ -49,9 +49,9 @@ cp .env.example .env
 
 ## Personnalisation
 
-Modifier les fichiers `identity/` pour définir
-la personnalité et le contexte de ton agent.
-Voir `identity/IDENTITY.md` pour commencer.
+Au premier message Telegram, l'agent guide la personnalisation
+de son identité via une conversation interactive (`identity/BOOTSTRAP.md`).
+Il met à jour les fichiers `identity/` lui-même.
 
 ## Monétisation / Support
 

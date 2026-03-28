@@ -102,7 +102,7 @@ cp ~/ancien-assistant/USER.md ~/.iagent/identity/USER.md
 - Supprimer les références à l'ancien gateway ou framework
 - Mettre à jour les chemins de fichiers vers `~/.iagent/`
 - Vérifier que le format est compatible avec iAgent
-  (voir les templates dans `identity/*.template.md` pour référence)
+  (voir les fichiers `identity/*.md` actuels pour référence)
 
 ### 3b. Projets métier
 
