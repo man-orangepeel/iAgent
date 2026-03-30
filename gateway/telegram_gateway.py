@@ -430,7 +430,7 @@ async def _send_response(message, html_text: str) -> None:
 
 
 async def _process_text_with_claude(
-    message, chat_id: str, user_text: str, *, timeout: int = 90
+    message, chat_id: str, user_text: str, *, timeout: int = 180
 ) -> None:
     """Traite un texte (tapé, transcrit ou extrait d'un document) via Claude CLI."""
     session_id, is_new, reset_info = get_or_create_session(chat_id)
