@@ -35,25 +35,24 @@ _LOG_DIR = _IAGENT_DIR / "logs"
 _LOG_FILE = _LOG_DIR / "runner.log"
 _MAX_CONTEXT_CHARS = 38_000  # Marge de sécurité sur budget 40k
 _DEFAULT_TIMEOUT = 60        # Règle optimisation financière : 60s max en production
-_CLAUDE_BIN = "claude"       # Doit être dans le PATH
 
 
-# --- Config gateway (chargée une seule fois au démarrage) ---
+# --- Config (chargée une seule fois au démarrage) ---
 
-def _load_gateway_config() -> dict:
-    """Charge la config gateway une seule fois."""
+def _load_config() -> dict:
+    """Charge la config iagent.json une seule fois."""
     try:
         import json
         cfg_file = _IAGENT_DIR / "config" / "iagent.json"
         if cfg_file.exists():
-            cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
-            return cfg.get("gateway", {})
+            return json.loads(cfg_file.read_text(encoding="utf-8"))
     except Exception:
         pass
-    # Fallback sécurisé : WebSearch uniquement
-    return {"tools": ["WebSearch"], "allowed_patterns": ["WebSearch"], "timeout": 90}
+    return {}
 
-_GATEWAY_CFG = _load_gateway_config()
+_CONFIG = _load_config()
+_CLAUDE_BIN = _CONFIG.get("claude_path", str(Path.home() / ".npm-global" / "bin" / "claude"))
+_GATEWAY_CFG = _CONFIG.get("gateway", {})
 _GATEWAY_TOOLS = _GATEWAY_CFG.get("tools", ["WebSearch"])
 _GATEWAY_TIMEOUT = _GATEWAY_CFG.get("timeout", 90)
 

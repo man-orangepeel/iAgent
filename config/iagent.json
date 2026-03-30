@@ -14,7 +14,7 @@
   },
   "python_path": "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3",
   "gateway": {
-    "tools": ["WebSearch", "Bash"],
+    "tools": ["WebSearch", "Bash", "Write", "Edit"],
     "timeout": 90
   },
   "tmp": {

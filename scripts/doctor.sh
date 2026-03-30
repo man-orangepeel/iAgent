@@ -22,7 +22,9 @@ check() { # label, result (0=OK), detail
 warn() { echo "  ⚠ $1"; [ -n "${2:-}" ] && echo "    $2"; WARN=$((WARN+1)); PASS=$((PASS+1)); }
 skip() { echo "  ⊘ $1 (sauté — mode quick)"; SKIP=$((SKIP+1)); }
 
-CLAUDE_PATH=$(which claude 2>/dev/null || true)
+CLAUDE_PATH=$(which claude 2>/dev/null \
+  || ([ -f "$HOME/.npm-global/bin/claude" ] && echo "$HOME/.npm-global/bin/claude") \
+  || true)
 PYTHON_PATH=$(which python3 2>/dev/null || true)
 ENV_FILE="$HOME/.iagent/.env"
 
@@ -34,8 +36,8 @@ echo "── Environnement ──"
 
 # 1. Claude CLI
 if [ -n "$CLAUDE_PATH" ]; then
-    CV=$(claude --version 2>/dev/null || echo "?")
-    AUTH=$(claude auth status 2>/dev/null | grep -c '"loggedIn": true' || echo 0)
+    CV=$("$CLAUDE_PATH" --version 2>/dev/null || echo "?")
+    AUTH=$("$CLAUDE_PATH" auth status 2>/dev/null | grep -c '"loggedIn": true' || echo 0)
     [ "$AUTH" -gt 0 ] && check "Claude CLI" 0 "$CV — authentifié" \
                       || check "Claude CLI" 1 "$CV — NON authentifié (claude auth login)"
 else
@@ -129,15 +131,18 @@ for pn in com.iagent.heartbeat com.iagent.telegram; do
     INST="$HOME/Library/LaunchAgents/${pn}.plist"
     [ ! -f "$SRC" ] || [ ! -f "$INST" ] && continue
     DRIFT=$(python3 -c "
-import plistlib
+import plistlib, os, re
 from pathlib import Path
-def kv(p):
+def kv(p, normalize=False):
     try:
-        pl = plistlib.loads(Path(p).read_bytes())
+        text = Path(p).read_text()
+        if normalize:
+            text = re.sub(r'/Users/USERNAME', '/Users/' + os.environ.get('USER','USERNAME'), text)
+        pl = plistlib.loads(text.encode())
         return {'program': pl.get('ProgramArguments',[]), 'path': pl.get('EnvironmentVariables',{}).get('PATH',''),
                 'interval': pl.get('StartInterval',0), 'keepalive': pl.get('KeepAlive',False)}
     except: return None
-s, i = kv('$SRC'), kv('$INST')
+s, i = kv('$SRC', normalize=True), kv('$INST')
 if s is None or i is None: print('PARSE_ERROR')
 elif s == i: print('OK')
 else:
@@ -314,7 +319,7 @@ if $QUICK; then
 else
     if [ -n "$PYTHON_PATH" ] && [ -n "$CLAUDE_PATH" ]; then
         ST=$(date +%s)
-        CT=$(echo "ping" | claude -p --no-session-persistence --output-format json --tools "" 2>/dev/null || echo "FAIL")
+        CT=$(echo "ping" | "$CLAUDE_PATH" -p --no-session-persistence --output-format json --tools "" 2>/dev/null || echo "FAIL")
         DUR=$(( $(date +%s) - ST ))
         if echo "$CT" | grep -q '"result"'; then check "Auth OAuth réelle" 0 "Réponse en ${DUR}s"
         elif echo "$CT" | grep -qi "not logged in\|unauthorized"; then check "Auth OAuth réelle" 1 "Token expiré — claude auth login"
