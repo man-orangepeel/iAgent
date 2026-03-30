@@ -9,8 +9,8 @@
 À la fin de ce guide, vous aurez :
 
 - Un **bot Telegram** personnel qui répond à vos messages (texte, voix, documents)
-- Un **brief matinal** automatique à 7h45 (agenda + emails non lus)
-- Des **rappels** d'événements 15 min avant chaque rendez-vous
+- Un **brief matinal** sur demande (`/brief`) ou planifiable manuellement
+- Des **rappels** d'événements configurables via Telegram
 - Un **heartbeat** toutes les 2h (maintenance mémoire, file d'attente, proactivité)
 - L'accès à **Gmail, Google Calendar et Drive** via commandes naturelles
 - La **transcription vocale** locale (Whisper, aucune donnée envoyée à un tiers)
@@ -41,12 +41,12 @@
 | Logiciel | Installation | Vérification |
 |---|---|---|
 | **Homebrew** | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` | `brew --version` |
-| **Python 3.14+** | `brew install python@3.14` | `python3 --version` |
+| **Python 3.14+** | Télécharger et installer depuis [python.org/downloads](https://www.python.org/downloads/) — utiliser le package macOS (`.pkg`), pas brew | `python3 --version` |
 | **Node.js 18+** | `brew install node` | `node --version` |
 | **ffmpeg** | `brew install ffmpeg` | `ffmpeg -version` |
-| **Whisper** | `pip3 install openai-whisper` | `whisper --help` |
+| **Whisper** | `brew install openai-whisper` | `whisper --help` |
 | **pdftotext** | `brew install poppler` | `pdftotext -v` |
-| **gog** | `npm install -g @nicholasgasior/gog` | `gog --version` |
+| **gog** | `brew install gogcli` | `gog --version` |
 
 ---
 
@@ -72,17 +72,25 @@
 ## Étape 2 — Installer Claude Code CLI
 
 ```bash
-# Installer Claude Code
-curl -fsSL https://claude.ai/install.sh | bash
+# Configurer npm global (évite sudo)
+mkdir -p ~/.npm-global
+npm config set prefix ~/.npm-global
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
+export PATH=~/.npm-global/bin:$PATH
+
+# Installer Claude Code CLI
+npm install -g @anthropic-ai/claude-code
 
 # S'authentifier (ouvre le navigateur)
-claude auth login
+~/.npm-global/bin/claude auth login
 ```
 
 Vérifier :
 ```bash
-claude --version
-# Attendu : claude-code X.Y.Z
+~/.npm-global/bin/claude --version
+# Attendu : numéro de version
+~/.npm-global/bin/claude auth status 2>&1 | grep loggedIn
+# Attendu : "loggedIn": true
 ```
 
 ---
@@ -91,7 +99,7 @@ claude --version
 
 ```bash
 # Cloner le dépôt
-git clone https://github.com/VOTRE_USER/iagent.git ~/.iagent
+git clone https://github.com/man-orangepeel/iagent ~/.iagent
 
 # Installer les dépendances Python
 cd ~/.iagent
@@ -119,10 +127,6 @@ Ouvrir `~/.iagent/.env` et remplir :
 # Telegram
 IAGENT_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrSTUvwxyz
 IAGENT_CHAT_ID=987654321
-
-# Google OAuth — rempli automatiquement par gog (étape 5)
-# GOG_CLIENT_ID=...
-# GOG_CLIENT_SECRET=...
 ```
 
 > **Ne jamais committer `.env`** — il est dans `.gitignore`.
@@ -137,33 +141,49 @@ IAGENT_CHAT_ID=987654321
 2. Créer un nouveau projet (ex. « iAgent »)
 3. Activer les APIs : **Gmail API**, **Google Calendar API**, **Google Drive API**
 
-### 5b. Créer les identifiants OAuth
+### 5b. Configurer l'écran de consentement OAuth
 
-1. Menu → APIs & Services → Credentials
-2. Create Credentials → OAuth client ID
-3. Type : **Desktop application**
-4. Télécharger le fichier JSON
-5. Copier `client_id` et `client_secret` dans `.env`
+1. Menu (☰) → **APIs et services** → **Google Auth Platform**
+2. Si non configuré → cliquer sur **Premiers Pas**
+3. Nom de l'application : `iAgent`, adresse email : votre Gmail
+4. **Cible** : sélectionner **Externe**
+5. Dans la page **Audience** → **Utilisateurs test** → **Add user** → votre adresse Gmail → **Enregistrer**
 
-### 5c. Authentifier gog
+### 5c. Créer les identifiants OAuth
+
+1. Menu → **APIs & Services** → **Identifiants**
+2. **+ Créer des identifiants** → **ID client OAuth**
+3. Type : **Application de bureau**
+4. Nom : `iAgent` → **Créer**
+5. Cliquer sur **Télécharger le JSON** — conserver ce fichier pour l'étape suivante
+
+> **Note :** gog gère ses credentials dans `~/Library/Application Support/gogcli/` — rien à copier dans `.env`.
+
+### 5d. Authentifier gog
 
 ```bash
-# Authentification Gmail
-gog gmail auth
+# Injecter le fichier JSON téléchargé (adapter le nom du fichier)
+gog auth credentials set ~/Downloads/<nom-du-fichier>.json
 
-# Authentification Calendar
-gog calendar auth
-
-# Authentification Drive (optionnel)
-gog drive auth
+# Générer l'URL d'autorisation
+gog auth add <VOTRE_EMAIL> --remote --step 1 --services gmail,calendar,drive
 ```
 
-Chaque commande ouvre le navigateur pour autoriser l'accès. Le token est stocké localement par gog.
+Copier l'URL `auth_url` affichée dans votre navigateur. Google demandera votre connexion et vos autorisations. **Votre navigateur affichera une erreur `127.0.0.1 n'autorise pas la connexion` — c'est normal.** Copier l'URL complète de la barre d'adresse (commence par `http://127.0.0.1:...`) et la coller dans le terminal :
+
+```bash
+echo "<URL_COPIÉE>" | gog auth add <VOTRE_EMAIL> --manual --services gmail,calendar,drive
+
+# Configurer le compte par défaut
+grep -q 'GOG_ACCOUNT' ~/.zshrc || echo 'export GOG_ACCOUNT=<VOTRE_EMAIL>' >> ~/.zshrc
+export GOG_ACCOUNT=<VOTRE_EMAIL>
+```
 
 **Vérifier :**
 ```bash
-gog gmail search "newer_than:1d" --max 3
-gog calendar list --days 3
+gog auth status
+gog gmail search "newer_than:1d" --max 1 --json | head -5
+gog calendar list --all --days 1 --json | head -5
 ```
 
 ---
@@ -182,7 +202,7 @@ Remplacez chaque `[À REMPLACER]` :
 - Nom du projet : le nom de votre agent
 - Compte macOS : votre nom d'utilisateur (`whoami`)
 - Chemin absolu : `/Users/VOTRE_USER/.iagent`
-- Python path : résultat de `which python3`
+- Python path : `/Library/Frameworks/Python.framework/Versions/3.14/bin/python3`
 - Langue : votre langue de travail
 
 > **Les fichiers `identity/IDENTITY.md`, `SOUL.md` et `USER.md`** seront
@@ -212,19 +232,16 @@ Le fichier `config/iagent.json` centralise les paramètres techniques :
   },
   "python_path": "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3",
   "gateway": {
-    "tools": ["WebSearch", "Bash"],
-    "timeout": 90
+    "tools": ["WebSearch", "Bash", "Write", "Edit"],
+    "timeout": 180
   }
 }
 ```
 
-**À adapter :**
-- **`python_path`** : vérifier avec `which python3` (doit pointer vers Python 3.14+)
-- **`session.ttl_hours`** : durée max d'une session Telegram avant rotation (défaut 4h)
-- **`session.max_size_kb`** : taille max du contexte avant rotation (défaut 200 Ko)
-- **Heure du brief matinal** : définie dans `launchagents/com.iagent.morning_brief.plist`
-  (clés `Hour` et `Minute`). Défaut : 7h45. Pour changer l'heure, modifier la plist
-  puis recharger le LaunchAgent.
+**Ce fichier est pré-configuré dans le repo — aucune modification manuelle nécessaire.**
+- `python_path` pointe vers Python 3.14 (framework macOS)
+- `gateway.tools` inclut `Write` et `Edit` — requis pour que l'agent puisse écrire ses fichiers de configuration lors du BOOTSTRAP
+- `gateway.timeout` à 180s — nécessaire pour l'écriture des fichiers identity lors de la première conversation
 
 ---
 
@@ -254,23 +271,23 @@ bash scripts/install_launchagents.sh
 ```
 
 Ce script va :
-1. Copier les 4 plists dans `~/Library/LaunchAgents/`
+1. Copier les 2 plists dans `~/Library/LaunchAgents/`
 2. Remplacer `USERNAME` par votre nom d'utilisateur macOS
 3. Charger les agents via `launchctl load`
 
-**Les 4 agents :**
+**Les 2 agents installés :**
 
 | Agent | Déclencheur | Rôle |
 |---|---|---|
-| `com.iagent.telegram` | Au login | Gateway Telegram (bot) |
-| `com.iagent.heartbeat` | Toutes les 2h | Maintenance (mémoire, queue, proactivité) |
-| `com.iagent.morning_brief` | 7h45 | Brief matinal (agenda + mails) |
-| `com.iagent.reminder` | Toutes les 15 min | Rappels d'événements |
+| `com.iagent.telegram` | Au login, permanent | Gateway Telegram (bot) |
+| `com.iagent.heartbeat` | Toutes les 2h | Maintenance (mémoire, surveillance) |
+
+> Le brief matinal et les rappels sont déclenchés par la gateway Telegram (commande `/brief`) — pas par des LaunchAgents séparés.
 
 **Vérifier :**
 ```bash
 launchctl list | grep iagent
-# Doit afficher les 4 agents avec un PID (ou 0 pour les agents calendar)
+# Doit afficher com.iagent.heartbeat et com.iagent.telegram avec un PID
 ```
 
 ---
@@ -285,24 +302,25 @@ Le diagnostic vérifie **17 points** :
 
 | # | Vérification | Criticité |
 |---|---|---|
-| 1 | Python trouvé | Bloquant |
-| 2 | Version Python ≥ 3.11 | Bloquant |
-| 3 | Claude CLI trouvé | Bloquant |
-| 4 | Claude CLI authentifié | Bloquant |
-| 5 | Dossier iAgent existe | Bloquant |
-| 6 | Fichier .env existe | Bloquant |
-| 7 | Variables .env requises | Bloquant |
-| 8 | Dépendances Python | Bloquant |
-| 9 | ffmpeg installé | Bloquant (voix) |
-| 10 | Whisper installé | Bloquant (voix) |
-| 11 | pdftotext installé | Warning |
-| 12 | gog installé | Bloquant (Google) |
-| 13 | gog Gmail auth | Bloquant (Google) |
-| 14 | gog Calendar auth | Bloquant (Google) |
-| 15 | LaunchAgents chargés | Warning |
+| 1 | Claude CLI trouvé | Bloquant |
+| 2 | Python trouvé | Bloquant |
+| 3 | Dossiers critiques existent | Bloquant |
+| 4 | Fichiers BOOTSTRAP présents | Bloquant |
+| 5 | iagent.json valide | Bloquant |
+| 6 | Variables .env requises | Bloquant |
+| 7 | python-telegram-bot installé | Bloquant |
+| 8 | ffmpeg installé | Bloquant (voix) |
+| 9 | Whisper installé | Bloquant (voix) |
+| 10 | pdftotext installé | Warning |
+| 11 | gog installé | Bloquant (Google) |
+| 12 | gog Gmail auth | Bloquant (Google) |
+| 13 | gog Calendar auth | Bloquant (Google) |
+| 14 | LaunchAgent heartbeat chargé | Warning |
+| 15 | LaunchAgent telegram chargé | Warning |
 | 16 | Gateway Telegram active | Warning |
+| 17 | Drift de configuration | Warning |
 
-**Résultat attendu : 16/16 ✓**
+**Résultat attendu : 17/17 ✓**
 
 > Mode rapide (sans appels réseau) : `bash scripts/doctor.sh --quick`
 
@@ -311,7 +329,7 @@ Le diagnostic vérifie **17 points** :
 ## Étape 11 — Audit de sécurité
 
 ```bash
-bash scripts/security-audit.sh
+bash scripts/security-audit.sh --fix
 ```
 
 L'audit vérifie **10 catégories** basées sur OWASP LLM Top 10, MITRE ATLAS et OWASP Agentic :
@@ -352,11 +370,10 @@ Ouvrir Telegram et envoyer un message à votre bot.
 
 | Commande | Description |
 |---|---|
-| `/start` | Message de bienvenue |
-| `/help` | Liste des commandes |
 | `/brief` | Lancer le brief matinal manuellement |
-| `/doctor` | Diagnostic rapide (14 checks) |
+| `/doctor` | Diagnostic rapide |
 | `/audit` | Audit de sécurité |
+| `/reset` | Réinitialiser la session (nouveau bootstrap) |
 | Message texte | Conversation libre avec l'agent |
 | Message vocal | Transcription automatique puis réponse |
 | Document PDF/DOCX | Extraction du texte puis analyse |
@@ -371,7 +388,7 @@ Ouvrir Telegram et envoyer un message à votre bot.
 
 ## Le brief matinal
 
-Chaque matin à 7h45, l'agent envoie automatiquement via Telegram :
+Envoyez `/brief` dans Telegram pour recevoir le brief à la demande. Exemple de contenu :
 
 ```
 ☀️ Brief du 28 mars 2026
@@ -391,8 +408,8 @@ Chaque matin à 7h45, l'agent envoie automatiquement via Telegram :
 • Payer facture électricité (demain)
 ```
 
-Le brief est déclenché par le LaunchAgent `com.iagent.morning_brief.plist`.
-Pour le lancer manuellement : `/brief` dans Telegram.
+Pour lancer le brief : `/brief` dans Telegram.
+Pour l'automatiser à une heure fixe, voir la plist `launchagents/com.iagent.morning_brief.plist` (installation manuelle, non incluse dans le script de base).
 
 ---
 
@@ -429,8 +446,6 @@ launchctl kickstart -k gui/$(id -u)/com.iagent.telegram
 # Arrêter tous les agents
 launchctl bootout gui/$(id -u)/com.iagent.telegram
 launchctl bootout gui/$(id -u)/com.iagent.heartbeat
-launchctl bootout gui/$(id -u)/com.iagent.morning_brief
-launchctl bootout gui/$(id -u)/com.iagent.reminder
 
 # Relancer tous les agents
 bash scripts/install_launchagents.sh
@@ -451,7 +466,7 @@ bash scripts/security-audit.sh --fix
 | `Claude CLI not found` | CLI non installée | `curl -fsSL https://claude.ai/install.sh \| bash` |
 | `Not authenticated` | Session CLI expirée | `claude auth login` |
 | `IAGENT_BOT_TOKEN missing` | `.env` incomplet | Vérifier `.env` |
-| `gog: command not found` | gog non installé | `npm install -g @nicholasgasior/gog` |
+| `gog: command not found` | gog non installé | `brew install gogcli` |
 | `Gmail auth expired` | Token Google expiré | `gog gmail auth` |
 | `Whisper model not found` | Premier lancement | Attendre le téléchargement automatique |
 | `ffmpeg not found` | ffmpeg non installé | `brew install ffmpeg` |

@@ -29,9 +29,9 @@ Envoyer ce message **en entier**, sans raccourci :
 > Je tourne en fond, je me surveille tout seul, et je ne dors jamais.
 >
 > Mais pour l'instant, je ne sais rien de toi. Ni comment tu t'appelles, ni comment tu travailles, ni ce qui t'énerve chez un assistant.
-> Alors avant d'être vraiment utile, j'ai besoin de te poser 8 questions. Ça prend 3 minutes.
+> Alors pour te servir au mieux, je vais d'abord te poser 8 questions. Ça prend 3 minutes, et tu pourras toujours compléter par la suite.
 >
-> (J'utilise ton forfait Claude pour te répondre : une demande de qualité demande du temps, sois patient)
+> Nota : J'utilise ton forfait Claude pour te répondre : une demande de qualité demande souvent du temps, sois patient.
 >
 > On y va ?"
 
