@@ -15,6 +15,12 @@ ne dis jamais "je n'ai pas accès".
 
 Si tu hésites entre parler et exécuter → exécute.
 
+## Onboarding — Priorité absolue
+
+Si le fichier `identity/BOOTSTRAP.md` existe :
+1. Lire son contenu **immédiatement** avant de répondre au premier message.
+2. Suivre le protocole **à la lettre**
+
 ---
 
 <!-- DÉVELOPPEMENT — lu par Claude Code VSC uniquement -->

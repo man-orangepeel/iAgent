@@ -55,6 +55,7 @@ _CLAUDE_BIN = _CONFIG.get("claude_path", str(Path.home() / ".npm-global" / "bin"
 _GATEWAY_CFG = _CONFIG.get("gateway", {})
 _GATEWAY_TOOLS = _GATEWAY_CFG.get("tools", ["WebSearch"])
 _GATEWAY_TIMEOUT = _GATEWAY_CFG.get("timeout", 90)
+_GATEWAY_CEILING = _GATEWAY_CFG.get("ceiling", 300)
 
 
 # --- Logging ---

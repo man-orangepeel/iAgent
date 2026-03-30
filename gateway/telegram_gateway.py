@@ -46,7 +46,7 @@ from telegram import BotCommand, Update
 from telegram.constants import ChatAction
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-from core.claude_runner import run_session_with_search
+from core.claude_runner import run_session_with_search, _GATEWAY_TIMEOUT, _GATEWAY_CEILING
 from core.context_builder import build as build_context
 from core.env_loader import load_env, require_env
 from core.session_manager import (
@@ -264,7 +264,7 @@ async def _handle_reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         session_id=new_id,
         is_new_session=True,
         bootstrap_context=bootstrap,
-        timeout=90,
+        timeout=_GATEWAY_TIMEOUT,
     )
     await message.reply_text(_WELCOME_MSG)
     if response.success:
@@ -418,6 +418,49 @@ async def _typing_loop(message, stop_event: asyncio.Event) -> None:
     _logger.debug("_typing_loop terminé | chat=%s", message.chat_id)
 
 
+async def _progress_loop(
+    message, stop_event: asyncio.Event, is_new_session: bool
+) -> None:
+    """Envoie des messages de progression visibles si l'opération prend du temps."""
+    _logger.debug("_progress_loop démarré | chat=%s", message.chat_id)
+    progress_msg = None
+    try:
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=60)
+            return  # Réponse arrivée avant 60s — rien à afficher
+        except asyncio.TimeoutError:
+            pass
+
+        label = "Bootstrap en cours" if is_new_session else "Traitement en cours"
+        try:
+            progress_msg = await message.reply_text(f"⏳ {label}...")
+        except Exception as e:
+            _logger.warning("_progress_loop envoi 60s erreur : %s", e)
+
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=120)
+            return
+        except asyncio.TimeoutError:
+            pass
+
+        try:
+            await message.reply_text("⚠️ L'opération prend plus de temps que prévu...")
+        except Exception as e:
+            _logger.warning("_progress_loop envoi 180s erreur : %s", e)
+
+        await stop_event.wait()
+
+    except asyncio.CancelledError:
+        pass
+    finally:
+        if progress_msg is not None:
+            try:
+                await progress_msg.delete()
+            except Exception:
+                pass  # Suppression silencieuse
+        _logger.debug("_progress_loop terminé | chat=%s", message.chat_id)
+
+
 async def _send_response(message, html_text: str) -> None:
     """Envoie la réponse Claude en chunks HTML avec fallback texte brut."""
     while html_text:
@@ -430,7 +473,7 @@ async def _send_response(message, html_text: str) -> None:
 
 
 async def _process_text_with_claude(
-    message, chat_id: str, user_text: str, *, timeout: int = 180
+    message, chat_id: str, user_text: str, *, timeout: int = _GATEWAY_CEILING
 ) -> None:
     """Traite un texte (tapé, transcrit ou extrait d'un document) via Claude CLI."""
     session_id, is_new, reset_info = get_or_create_session(chat_id)
@@ -444,6 +487,7 @@ async def _process_text_with_claude(
 
     stop_typing = asyncio.Event()
     typing_task = asyncio.create_task(_typing_loop(message, stop_typing))
+    progress_task = asyncio.create_task(_progress_loop(message, stop_typing, is_new))
     try:
         loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(None, lambda: run_session_with_search(
@@ -457,9 +501,15 @@ async def _process_text_with_claude(
         stop_typing.set()
         await asyncio.sleep(0)  # laisser la loop traiter l'event avant de continuer
         typing_task.cancel()
+        await progress_task  # permet le delete() dans le finally de _progress_loop
 
     if not response.success:
-        await message.reply_text(f"⚠️ Erreur : {response.error}")
+        if response.error == "TIMEOUT":
+            await message.reply_text(
+                f"⏱️ Délai dépassé — l'opération n'a pas répondu dans les {timeout}s impartis."
+            )
+        else:
+            await message.reply_text(f"⚠️ Erreur : {response.error}")
         return
 
     await _send_response(message, _md_to_html(response.text))
@@ -554,7 +604,7 @@ async def _handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         f"{'='*40}"
     )
 
-    await _process_text_with_claude(message, chat_id, prompt, timeout=120)
+    await _process_text_with_claude(message, chat_id, prompt, timeout=_GATEWAY_CEILING)
 
     # Nettoyer si pas stocké
     if not store_project:

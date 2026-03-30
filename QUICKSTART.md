@@ -1,7 +1,7 @@
 # QUICKSTART — iAgent
 
 > Suis ces étapes dans l'ordre.
-> À l'étape 5, Claude Code prend le relais — **tu n'as qu'à valider ce qu'il te propose.**
+> À l'étape 5, Claude Code prend le relais.
 
 ---
 
@@ -24,6 +24,8 @@
 2. Chercher `Claude Code`
 3. Cliquer **Install**
 
+> 💬 **Dès maintenant, utilise le tchat Claude Code pour tout.**
+
 ### Étape 4 — Ouvrir ce fichier dans VS Code
 
 Dans VS Code, ouvrir le dossier où tu as enregistré le fichier :
@@ -38,8 +40,6 @@ Dans VS Code, ouvrir le dossier où tu as enregistré le fichier :
 3. Copie-colle ce message dans le chat :
 
 `Lis le fichier QUICKSTART.md qui est dans ce dossier et suis les instructions de la section CE QUE FAIT CLAUDE.`
-
-> 💬 **Dès maintenant, utilise le tchat Claude Code pour tout.** Quand Claude te demande quelque chose ou te donne un résultat, réponds dans le chat — c'est lui qui coordonne. Tu n'as qu'à valider ou confirmer.
 
 **À partir de là, Claude Code prend le relais. Lis ce qu'il t'explique et réponds-lui.**
 
@@ -67,9 +67,10 @@ echo "✓ Repo cloné dans : $IAGENT_DIR"
 Puis :
 1. Demander à l'utilisateur d'ajouter le nouveau dossier dans VS Code : `File → Add Folder to Workspace...` → sélectionne `~/.iagent`
 2. Lui demander d'ouvrir `QUICKSTART.md` dans ce nouveau dossier
-3. Lui demander de fermer le dossier initial (`File → Remove Folder from Workspace`)
+3. Lui demander de fermer le dossier initial (`Clic droit → Remove Folder from Workspace`)
+4. Lui demander de copier le message ci-dessous, de fermer puis rouvrir VS Code, puis coller le message dans le chat :
 
-Attendre la confirmation avant de continuer.
+`Lis le fichier QUICKSTART.md qui est dans ce dossier et suis les instructions de la section CE QUE FAIT CLAUDE.`
 
 ### Étape 7 — Vérifier la présence du runbook et orienter
 
@@ -83,7 +84,7 @@ RUNBOOK="$IAGENT_DIR/docs/install/runbook-install.md"
 Demander à l'utilisateur :
 > "Tu as le runbook. Trois options pour continuer :
 > - 📖 **Manuel** : tu suis le guide pas à pas toi-même → `docs/install/guide-installation.md`
-> - 🤖 **Automatique** : je gère l'installation grâce au runbook, tu valides les étapes clés (recommandé)
+> - 🤖 **Automatique** : je gère l'installation grâce au runbook, tu valides les étapes clés
 > - 🚀 **Sans toucher au code ? Plus puissant ? Et sur mesure ?** : le [AI Chief of Staff Bootcamp](https://aichiefofstaffbootcamp.netlify.app/) (Neon&Slate)
 >   t'accompagne en 4 semaines pour déployer tes propres agents IA — emails, réunions, notes,
 >   to-do, production de contenu — sans prérequis technique.
