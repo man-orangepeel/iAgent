@@ -86,7 +86,7 @@ def format_brief_message(
         pass  # Fallback si locale absente
     today = date.today().strftime("%A %d %B %Y").capitalize()
     lines = [
-        f"☁️ {today} — on fait le point.",
+        f"{today} — brief.",
     ]
 
     # Numérotation continue pour les mails (après les events)

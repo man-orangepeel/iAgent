@@ -130,8 +130,8 @@ def _get_unread_mails(existing_renotify_ids: set) -> list:
     idx = 0
 
     # Structure gog : {"threads": [{id, date, from, subject, labels, ...}]}
-    # Inverser : plus vieux d'abord (gog retourne les plus récents en premier)
-    items = list(reversed(raw.get("threads", [])))
+    # gog retourne les plus récents en premier — conserver cet ordre (plus récent → plus ancien)
+    items = list(raw.get("threads", []))
     for item in items:
         if idx >= len(letters):
             break

@@ -17,6 +17,7 @@ Usage :
     python3 gateway/telegram_gateway.py --dry-run     # vérification config
 """
 import argparse
+import asyncio
 import logging
 import re
 import sys
@@ -42,6 +43,7 @@ class _TokenFilter(logging.Filter):
 sys.path.insert(0, str(_IAGENT_DIR))
 
 from telegram import BotCommand, Update
+from telegram.constants import ChatAction
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 from core.claude_runner import run_session_with_search
@@ -66,7 +68,7 @@ _MAX_MSG_LEN = 4000
 _TMP_AUDIO_DIR = _IAGENT_DIR / "tmp" / "audio"
 _TMP_DOC_DIR = _IAGENT_DIR / "tmp" / "documents"
 
-_WELCOME_MSG = "🐉☁️ Nouvelle session — iAgent prêt."
+_WELCOME_MSG = "Nouvelle session — prêt."
 
 
 def _table_to_pre(table_lines: list[str]) -> str:
@@ -391,8 +393,29 @@ async def _handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if any(w in text_lower for w in ("transcri", "retranscri", "donne-moi le texte")):
         context.chat_data["wants_transcript"] = True
 
-    await message.reply_text("Reçu ☁️")
     await _process_text_with_claude(message, chat_id, user_text)
+
+
+async def _typing_loop(message, stop_event: asyncio.Event) -> None:
+    """Envoie l'indicateur 'typing...' toutes les 4s jusqu'à stop_event."""
+    _logger.debug("_typing_loop démarré | chat=%s", message.chat_id)
+    try:
+        while not stop_event.is_set():
+            try:
+                await message.get_bot().send_chat_action(
+                    chat_id=message.chat_id, action=ChatAction.TYPING
+                )
+                _logger.debug("ChatAction.TYPING envoyé | chat=%s", message.chat_id)
+            except Exception as e:
+                _logger.warning("_typing_loop send_chat_action erreur : %s", e)
+            try:
+                await asyncio.wait_for(stop_event.wait(), timeout=4)
+                break  # stop_event set → sortir
+            except asyncio.TimeoutError:
+                pass  # 4s écoulées → renvoyer TYPING
+    except asyncio.CancelledError:
+        pass
+    _logger.debug("_typing_loop terminé | chat=%s", message.chat_id)
 
 
 async def _send_response(message, html_text: str) -> None:
@@ -419,13 +442,21 @@ async def _process_text_with_claude(
     bootstrap = build_context("telegram_session") if is_new else ""
     prompt = user_text if is_new else f"[Outils actifs: gog, iagent, WebSearch]\n\n{user_text}"
 
-    response = run_session_with_search(
-        prompt=prompt,
-        session_id=session_id,
-        is_new_session=is_new,
-        bootstrap_context=bootstrap,
-        timeout=timeout,
-    )
+    stop_typing = asyncio.Event()
+    typing_task = asyncio.create_task(_typing_loop(message, stop_typing))
+    try:
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(None, lambda: run_session_with_search(
+            prompt=prompt,
+            session_id=session_id,
+            is_new_session=is_new,
+            bootstrap_context=bootstrap,
+            timeout=timeout,
+        ))
+    finally:
+        stop_typing.set()
+        await asyncio.sleep(0)  # laisser la loop traiter l'event avant de continuer
+        typing_task.cancel()
 
     if not response.success:
         await message.reply_text(f"⚠️ Erreur : {response.error}")
@@ -639,10 +670,15 @@ def dry_run() -> None:
 
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s | %(name)s | %(message)s",
+        level=logging.DEBUG,
+        format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
+    # Réduire le bruit des libs externes
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("telegram").setLevel(logging.INFO)
+    logging.getLogger("apscheduler").setLevel(logging.WARNING)
     logging.getLogger().addFilter(_TokenFilter())
     parser = argparse.ArgumentParser(description="Gateway Telegram iAgent")
     parser.add_argument("--dry-run", action="store_true")
