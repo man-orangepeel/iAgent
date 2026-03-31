@@ -41,15 +41,16 @@ response = claude_run("Mon prompt", context_files=["identity/IDENTITY.md"], time
 
 ## Telegram — envoi direct
 
-```python
-# Via le skill telegram (tokens depuis .env)
-from skills.telegram.telegram_client import send_message, send_photo, send_poll
-send_message("Texte")
-send_photo("https://...", caption="Légende")
-send_poll("?", ["Oui", "Non", "Peut-être"])
+**Ne jamais appeler require_env() toi-même pour les tokens Telegram.**
+Utilise les factory functions qui gèrent les credentials automatiquement :
 
-# DM alertes opérateur
-send_message("Alerte : ...", chat_id=IAGENT_CHAT_ID)
+```python
+# Bot principal → DM opérateur (alertes, tests, notifications)
+from skills.telegram.telegram_client import get_alerts_client
+client = get_alerts_client()
+client.send_message("Texte")
+client.send_photo("https://...", caption="Légende")
+client.send_poll("?", ["Oui", "Non", "Peut-être"])
 ```
 
 ---
