@@ -124,6 +124,16 @@ AL=${AL:-0}
 [ "$AL" -ge 2 ] && check "LaunchAgents" 0 "$AL/2 chargés" \
                  || check "LaunchAgents" 1 "$AL/2 (bash scripts/install_launchagents.sh)"
 
+# 7b. Instance unique gateway (détecte les processus fantômes)
+GW_COUNT=$(ps aux | grep "[t]elegram_gateway.py" | wc -l | tr -d ' ')
+if [ "$GW_COUNT" -eq 1 ]; then
+    check "Instance gateway" 0 "1 processus"
+elif [ "$GW_COUNT" -eq 0 ]; then
+    warn "Instance gateway" "Aucun processus telegram_gateway.py"
+else
+    check "Instance gateway" 1 "$GW_COUNT processus — tuer les doublons (ps aux | grep telegram_gateway)"
+fi
+
 # 13. Drift plists (comparaison via plistlib)
 DRIFT_OK=true
 for pn in com.iagent.heartbeat com.iagent.telegram; do
