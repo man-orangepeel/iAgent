@@ -7,6 +7,18 @@ Tu as OpenClaw ou un agent custom, et tu veux passer à iAgent.
 Complète d'abord l'installation de base ([docs/install/](../install/))
 et vérifie que `bash scripts/doctor.sh` passe sans erreur.
 
+## Avant de commencer
+```bash
+python3 --version   # 3.11+
+node --version      # 18+
+brew --version
+claude --version    # Claude Code CLI + forfait Pro ou Max
+bash scripts/doctor.sh --quick  # 14/14 attendu
+```
+
+Si une commande échoue ou si doctor ne passe pas, complète d'abord
+l'installation de base avant de migrer.
+
 ## Ce que couvre la migration
 
 - Audit de ton assistant existant (composants, dépendances, sécurité)
@@ -23,6 +35,7 @@ Durée : 1–2h selon la complexité de ta configuration.
 **Runbook Claude Code** — [sur demande](https://www.linkedin.com/in/manuelproquin/)
 Claude Code audite ton ancien assistant, produit le tableau de migration,
 exécute les actions, tu valides à chaque checkpoint.
+Durée : 30–45 min.
 
 ---
 

@@ -132,22 +132,34 @@ cp ~/ancien-assistant/data/state.json ~/.iagent/data/
 
 ### 3d. Personnaliser CLAUDE.md
 
-Éditez `~/.iagent/CLAUDE.md` (créé à l'installation via `identity/CLAUDE-template.md`)
-pour ajouter :
-- Les décisions architecturales de votre migration
+Éditez `~/.iagent/CLAUDE.md` (créé à l'installation via `identity/CLAUDE-template.md`).
+
+Si ce n'est pas déjà fait, remplacez chaque `[À REMPLACER]` :
+- **Nom du projet** : le nom de votre agent
+- **Compte macOS** : votre nom d'utilisateur (`whoami`)
+- **Chemin absolu** : `/Users/VOTRE_USER/.iagent`
+- **Python path** : `/Library/Frameworks/Python.framework/Versions/3.14/bin/python3`
+- **Langue** : votre langue de travail
+
+Puis ajoutez les éléments spécifiques à votre migration :
+- Les décisions architecturales issues du tableau de migration (étape 2)
 - Les problèmes connus spécifiques à votre configuration
-- Les phases de votre migration (à la place des phases génériques)
+- Les composants migrés et leur statut (CONSERVER, REMPLACER_LLM, etc.)
 
-### 3e. Personnaliser iagent.json
+### 3e. Vérifier iagent.json
 
-Éditez `~/.iagent/config/iagent.json` pour ajuster :
-- `python_path` : résultat de `which python3` sur votre machine
-- `session.ttl_hours` : durée (en heures) avant réinitialisation automatique
-  d'une session Telegram inactive (défaut : 4h)
-- `session.max_size_kb` : taille max d'un fichier de session avant
-  réinitialisation forcée (défaut : 200 KB). La réinitialisation ne se
-  déclenche que si **les deux conditions** sont remplies (TTL dépassé ET
-  taille dépassée). **Ne pas modifier** sans comprendre ce mécanisme.
+Le fichier `~/.iagent/config/iagent.json` est **pré-configuré dans le repo — aucune
+modification manuelle nécessaire** dans la plupart des cas.
+
+Points importants pour la migration :
+- `python_path` pointe vers `/Library/Frameworks/Python.framework/Versions/3.14/bin/python3` —
+  vérifiez que ce chemin existe sur votre machine (`ls -la` sur ce chemin)
+- `gateway.tools` inclut `Write` et `Edit` — **requis** pour que l'agent puisse
+  écrire ses fichiers de configuration lors du BOOTSTRAP. Ne pas retirer ces outils.
+- `gateway.timeout` à 180s — nécessaire pour l'écriture des fichiers identity
+  lors de la première conversation
+
+Référence complète : voir `docs/install/guide-installation.md`, étape 7.
 
 ---
 
@@ -190,11 +202,30 @@ cd ~/.iagent
 bash scripts/doctor.sh
 ```
 
+**Résultat attendu : 17/17 ✓** — Le diagnostic vérifie 17 points (environnement,
+fichiers, services, connectivité, heartbeat, sécurité, sauvegarde).
+Mode rapide (sans appels réseau) : `bash scripts/doctor.sh --quick` → 14/14 attendu.
+
+Pour le détail des 17 vérifications, voir `docs/install/guide-installation.md`, étape 10.
+
 ### Audit de sécurité
 
 ```bash
-bash scripts/security-audit.sh
+bash scripts/security-audit.sh --fix
 ```
+
+**Résultat attendu : 0 critique, 0 élevé — posture ACCEPTABLE.**
+L'audit vérifie 10 catégories (permissions fichiers, secrets exposés, isolation,
+injection de prompts, exfiltration, authentification, logging, dépendances, réseau,
+configuration).
+
+Le flag `--fix` corrige automatiquement les permissions (chmod). Autres options :
+```bash
+bash scripts/security-audit.sh --json       # sortie JSON
+bash scripts/security-audit.sh --category 3 # une seule catégorie
+```
+
+Pour le détail des 10 catégories, voir `docs/install/guide-installation.md`, étape 11.
 
 ### Test Telegram
 
@@ -202,6 +233,24 @@ Envoyez un message à votre bot et vérifiez :
 - Réponse reçue avec le ton attendu
 - Bootstrap chargé (identité correcte)
 - Session persistante (2e message sans re-bootstrap)
+
+**Commandes disponibles :**
+
+| Commande | Description |
+|---|---|
+| `/brief` | Lancer le brief matinal manuellement |
+| `/doctor` | Diagnostic rapide |
+| `/audit` | Audit de sécurité |
+| `/reset` | Réinitialiser la session (nouveau bootstrap) |
+| Message texte | Conversation libre avec l'agent |
+| Message vocal | Transcription automatique puis réponse |
+| Document PDF/DOCX | Extraction du texte puis analyse |
+
+**Test rapide :**
+1. Envoyer « Bonjour » → l'agent doit répondre avec l'identité migrée
+2. Envoyer `/brief` → brief matinal avec agenda et mails
+3. Envoyer un vocal → transcription puis réponse
+4. Envoyer `/doctor` → diagnostic santé
 
 ### Test des composants migrés
 
@@ -245,3 +294,17 @@ Si un composant migré ne fonctionne pas :
    ```
 3. Comparez avec le comportement original dans votre ancien assistant
 4. Consultez les erreurs fréquentes dans `docs/install/guide-installation.md`
+
+---
+
+## Références utiles
+
+Le guide d'installation (`docs/install/guide-installation.md`) contient des sections
+complémentaires qui restent pertinentes après migration :
+
+- **Brief matinal** — fonctionnement et personnalisation du `/brief`
+- **Skills disponibles** — Gmail, Calendar, Drive, Whisper, Documents
+- **Commandes de maintenance** — logs, redémarrage, diagnostic rapide
+- **Erreurs fréquentes** — table des erreurs courantes et solutions
+- **Rotation des tokens en urgence** — procédure si un token est compromis
+- **Sécurité** — principes de sécurité d'iAgent
