@@ -3,9 +3,10 @@
 *.pem
 *.key
 
-# Données personnelles
+# Données personnelles et runtime
 data/sessions.json
 data/integrity.json
+data/memory/heartbeat-state.json
 data/memory/*.md
 projects/*/state/*.json
 logs/*.log
