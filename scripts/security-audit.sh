@@ -181,6 +181,15 @@ if section 2 "Prompt Injection Defense"; then
         audit CRITICAL "injection_detector absent" "fichier manquant"
     fi
 
+    # 2b. injection_detector activé dans gateway
+    GW_IMPORT=$(grep -c "from core.utils.injection_detector import" "$IAGENT_DIR/gateway/telegram_gateway.py" 2>/dev/null)
+    GW_CALL=$(grep -c "detect_injection" "$IAGENT_DIR/gateway/telegram_gateway.py" 2>/dev/null)
+    if [ "$GW_IMPORT" -ge 1 ] && [ "$GW_CALL" -ge 2 ]; then
+        audit OK "injection_detector activé dans gateway" "import + $GW_CALL appels"
+    else
+        audit CRITICAL "injection_detector non activé dans gateway" "import=$GW_IMPORT appels=$GW_CALL"
+    fi
+
     # 2c. Patterns injection dans bootstrap et prompts
     # Vérifier ligne par ligne pour éviter les faux positifs dus au contexte
     SUSPECT=0

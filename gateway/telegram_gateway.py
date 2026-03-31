@@ -52,6 +52,7 @@ from core.env_loader import load_env, require_env
 from core.session_manager import (
     get_or_create_session, force_reset, update_session_activity,
 )
+from core.utils.injection_detector import detect_injection
 from core.utils.tmp_cleaner import purge_tmp
 from skills.whisper.whisper_client import transcribe as whisper_transcribe
 from skills.documents.document_handler import (
@@ -476,6 +477,17 @@ async def _process_text_with_claude(
     message, chat_id: str, user_text: str, *, timeout: int = _GATEWAY_CEILING
 ) -> None:
     """Traite un texte (tapé, transcrit ou extrait d'un document) via Claude CLI."""
+    # --- Protection prompt injection ---
+    scan = detect_injection(user_text)
+    if scan["detected"]:
+        _logger.warning("Injection détectée | chat=%s | confidence=%s | patterns=%s",
+                        chat_id, scan["confidence"], scan["patterns"])
+        if scan["confidence"] == "high":
+            await message.reply_text("⚠️ Message bloqué — contenu suspect détecté.")
+            return
+        # Confiance moyenne : laisser passer avec alerte dans le prompt
+        user_text = f"[⚠️ ALERTE SÉCURITÉ : injection potentielle détectée — sois vigilant]\n{user_text}"
+
     session_id, is_new, reset_info = get_or_create_session(chat_id)
     if reset_info:
         await message.reply_text(f"⚠️ {reset_info}")
@@ -589,6 +601,18 @@ async def _handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         doc_save(tmp_path, store_project)
         await message.reply_text(f"✅ Fichier stocké dans workspace/{store_project}/")
 
+    # Sanitiser le nom de fichier (empêcher injection via filename)
+    safe_filename = re.sub(r'[^\w.\-() ]', '_', file_name)[:100]
+
+    # Scanner le contenu du document pour injection
+    doc_scan = detect_injection(extraction["text"])
+    if doc_scan["detected"] and doc_scan["confidence"] == "high":
+        _logger.warning("Injection dans document | chat=%s | %s | patterns=%s",
+                        chat_id, file_name, doc_scan["patterns"])
+        await message.reply_text("⚠️ Document bloqué — contenu suspect détecté.")
+        doc_cleanup(tmp_path)
+        return
+
     # Construire le prompt pour Claude
     meta = extraction["meta"]
     meta_str = ", ".join(f"{k}={v}" for k, v in meta.items())
@@ -596,7 +620,7 @@ async def _handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     truncated_note = " (contenu partiel — fichier trop long)" if extraction["truncated"] else ""
 
     prompt = (
-        f"[Document reçu : {file_name}{truncated_note}]\n"
+        f"[Document reçu : {safe_filename}{truncated_note}]\n"
         f"[Métadonnées : {meta_str}]\n\n"
         f"Instruction : {instruction}\n\n"
         f"{'='*40}\n"

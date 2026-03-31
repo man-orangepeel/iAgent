@@ -1,4 +1,4 @@
-"""Détecteur heuristique de prompt injection pour emails entrants."""
+"""Détecteur heuristique de prompt injection (emails, messages Telegram, documents)."""
 import re
 from typing import Optional
 
@@ -21,6 +21,16 @@ _INJECTION_PATTERNS = [
     r'execute\s+this\s+(code|script|command)',
     r'download\s+this\s+file',
     r'exfiltrate',
+    # --- Patterns français (agent francophone) ---
+    r'ignore\s+(toutes?\s+)?(les\s+)?instructions\s+pr[ée]c[ée]dentes',
+    r'oublie\s+(toutes?\s+)?(les\s+)?instructions',
+    r'tu\s+es\s+maintenant\s+un',
+    r'nouveau\s+prompt\s+syst[èe]me',
+    # --- Tentatives d'accès fichiers sensibles ---
+    r'affiche\s+(le\s+)?(fichier\s+)?\.env',
+    r'cat\s+[./]*\.env',
+    r'lis\s+(le\s+contenu\s+de\s+)?credentials',
+    r'montre\s+(moi\s+)?(le\s+)?\.env',
 ]
 
 # Patterns cachés (style invisible) — tentatives de cacher les injections
