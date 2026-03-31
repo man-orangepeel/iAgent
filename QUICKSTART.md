@@ -45,9 +45,9 @@ Dans VS Code, ouvrir le dossier où tu as enregistré le fichier :
 
 ---
 
-## Ce que fait Claude (étapes 6–9)
+## Ce que fait Claude (étapes 6–7 - et plus avec le runbook)
 
-> *Cette section est à destination de Claude Code — pas à lire par l'utilisateur.*
+> *Cette section est à destination de Claude Code.*
 
 ### Étape 6 — Choisir l'emplacement et cloner le repo
 
@@ -105,7 +105,7 @@ Demander à l'utilisateur :
 > "Je ne trouve pas le runbook d'installation automatisée dans le repo.
 > Trois options :
 > - 📖 **Manuel** : tu suis le guide pas à pas → `docs/install/guide-installation.md`
-> - 🤖 **Automatique** : rends-toi sur [orangepeel-iagent.fr](https://www.orangepeel-iagent.fr)
+> - 🤖 **Automatique** : rends-toi sur [orangepeel-iagent.fr](https://www.OrangePeel-iAgent.fr)
 >   pour recevoir le runbook par email, enregistre-le ici : `docs/install/runbook-install.md`
 >   et dis-moi quand c'est fait.
 > - 🚀 **Sans toucher au code ? Plus puissant ? Et sur mesure ?** : le [AI Chief of Staff Bootcamp](https://aichiefofstaffbootcamp.netlify.app/) (Neon&Slate)
