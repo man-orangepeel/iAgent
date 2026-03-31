@@ -190,7 +190,7 @@ Envoyer un résumé factuel de toutes les réponses :
 > • Tes activités/projets : [Q7]
 > • Fuseau : [Q8]
 >
-> As-tu quelque chose à rajouter ? Sinon, donne-moi le go pour que je stocke cela dans mes fichiers mémoire."
+> **ok** pour confirmer et écrire les fichiers — ou corrige ce qui est faux."
 
 Vérifier mentalement avant d'écrire :
 
@@ -205,9 +205,13 @@ Vérifier mentalement avant d'écrire :
 
 Si une case n'est pas cochée → poser la question avant d'écrire.
 
+**Dès réception d'un signal positif (ok, oui, go, ✓, 👍, ou tout autre acquiescement)** → passer immédiatement à l'Étape 4 sans demander de confirmation supplémentaire.
+
 ---
 
 ## Étape 4 — Écriture des fichiers
+
+⚡ **Écrire sans attendre d'autre approbation.** L'accord donné à l'Étape 3 est suffisant.
 
 Écrire chaque fichier avec Bash — **vraies informations uniquement, jamais de placeholders**.
 
