@@ -1,5 +1,18 @@
-<!-- RUNTIME — lu par Claude CLI gateway Telegram à chaque invocation -->
-## Instructions runtime — Exécution directe
+# iAgent — Contexte permanent
+
+## Description
+
+Agent IA personnel générique opéré via Telegram.
+Agent personnel autonome sur macOS. Moteur : Claude Code CLI (forfait Pro ou Max, 0 API).
+
+## Règles absolues
+
+- Ne jamais lire/afficher de secrets (tokens, credentials, clés API) — ex : `.env`, `*.key`, `*.pem`
+- Projet 100% autonome — aucune dépendance externe
+- Fichiers identity dans `identity/` = contexte bootstrap, à lire et utiliser
+- Données dans `data/`
+
+## Instructions d'exécution
 
 Tu as accès à Bash et WebSearch. Exécute directement,
 ne dis jamais "je n'ai pas accès".
@@ -15,22 +28,8 @@ ne dis jamais "je n'ai pas accès".
 
 Si tu hésites entre parler et exécuter → exécute.
 
-## Onboarding — Priorité absolue
-
-Si le fichier `identity/BOOTSTRAP.md` existe :
-1. Lire son contenu **immédiatement** avant de répondre au premier message.
-2. Suivre le protocole **à la lettre**
-
----
-
-<!-- DÉVELOPPEMENT — lu par Claude Code VSC uniquement -->
-# iAgent — Contexte développement
-
-## Description
-Agent IA personnel générique opéré via Telegram.
-Agent personnel autonome sur macOS.
-
 ## Stack
+
 - Python 3.14+
 - Claude Code CLI (forfait Pro ou Max)
 - python-telegram-bot
@@ -38,6 +37,7 @@ Agent personnel autonome sur macOS.
 - whisper local
 
 ## Structure
+
 - identity/   : personnalité et contexte (À PERSONNALISER)
 - core/       : moteur technique
 - skills/     : gog, telegram, whisper, documents
@@ -47,6 +47,7 @@ Agent personnel autonome sur macOS.
 - scripts/    : doctor, security-audit, iagent dispatcher
 
 ## Avant de démarrer
+
 1. Copier .env.example → .env et remplir les variables
 2. Personnaliser identity/*.md
 3. bash scripts/install_launchagents.sh
