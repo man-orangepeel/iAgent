@@ -11,9 +11,92 @@ Format de réponse attendu (flexible) :
 Non reconnu → None (message normal, pas une réponse brief)
 """
 import html as html_mod
+import logging
+import pathlib
+import random
 import re
+import subprocess
 from datetime import date
 from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+_IDENTITY_DIR = pathlib.Path(__file__).resolve().parents[2] / "identity"
+
+_GREETING_ANGLES = [
+    "un proverbe détourné",
+    "un mot d'encouragement sincère",
+    "une ref ciné, série ou musique",
+    "un clin d'œil à un de ses projets",
+    "une vanne entre potes",
+    "une question pour lancer la journée",
+    "une métaphore inattendue",
+    "un constat philosophique léger",
+    "une ref à la date ou au jour de la semaine",
+    "un slogan motivant inventé",
+]
+
+_FALLBACK_GREETING = "on fait le point."
+
+
+def _parse_user_context() -> dict:
+    """Lit identity/USER.md et extrait nom, rôle, projets."""
+    result = {"name": "", "role": "", "projects": ""}
+    user_file = _IDENTITY_DIR / "USER.md"
+    if not user_file.exists():
+        return result
+    try:
+        text = user_file.read_text(encoding="utf-8")
+        name_m = re.search(r"\*\*Prénom\s*:\*\*\s*(.+)", text)
+        role_m = re.search(r"\*\*Rôle\s*:\*\*\s*(.+)", text)
+        projects = re.findall(r"\|\s*#\d+\s*\|\s*(.+?)\s*\|", text)
+        if name_m:
+            result["name"] = name_m.group(1).strip()
+        if role_m:
+            result["role"] = role_m.group(1).strip()
+        if projects:
+            result["projects"] = ", ".join(projects)
+    except OSError as e:
+        logger.warning("Failed to read USER.md: %s", e)
+    return result
+
+
+def _generate_greeting(today_str: str) -> str:
+    """Appelle Claude CLI pour générer une phrase d'accroche variée."""
+    ctx = _parse_user_context()
+    user_name = ctx["name"] or "l'utilisateur"
+    angle = random.choice(_GREETING_ANGLES)
+
+    parts = [
+        f"Écris une courte phrase pour accueillir {user_name} dans son brief matinal.",
+    ]
+    if ctx["role"]:
+        parts.append(f"{user_name} est {ctx['role']}.")
+    if ctx["projects"]:
+        parts.append(f"Ses projets : {ctx['projects']}.")
+    parts.append(f"Date : {today_str}.")
+    parts.append(f"Angle : {angle}.")
+    parts.append(
+        "Sois naturel, comme un ami. "
+        "Max 50 caractères, pas d'emoji, pas de guillemets, pas de date. "
+        "La phrase uniquement."
+    )
+    prompt = " ".join(parts)
+
+    try:
+        result = subprocess.run(
+            ["claude", "-p", prompt, "--max-turns", "1"],
+            capture_output=True, text=True, timeout=30,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            greeting = result.stdout.strip().strip('"').strip("'")
+            if 5 < len(greeting) < 80:
+                return greeting
+        logger.warning("Claude CLI returned empty or invalid greeting, using fallback")
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
+        logger.warning("Claude CLI greeting failed (%s), using fallback", e)
+    return _FALLBACK_GREETING
+
 
 # Token valide : chiffre seul, chiffre-délai, ou lettre (majuscule ou minuscule)
 _TOKEN_PATTERN = re.compile(r"^(?:\d+(?:-\d+)?|[A-Za-z])$")
@@ -85,8 +168,9 @@ def format_brief_message(
     except locale.Error:
         pass  # Fallback si locale absente
     today = date.today().strftime("%A %d %B %Y").capitalize()
+    greeting = _generate_greeting(today)
     lines = [
-        f"{today} — brief.",
+        f"{today} — {greeting}",
     ]
 
     # Numérotation continue pour les mails (après les events)
